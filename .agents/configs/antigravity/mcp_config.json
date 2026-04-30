@@ -1,0 +1,5 @@
+{ "mcpServers": {
+  "context7": { "command": "npx", "args": ["-y", "@upstash/context7-mcp"] },
+  "jcodemunch-mcp": { "command": "uvx", "args": ["jcodemunch-mcp"] },
+  "laravel-boost": { "command": "php", "args": ["artisan", "boost:mcp"] }
+} }
