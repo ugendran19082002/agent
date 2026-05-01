@@ -1,22 +1,19 @@
 # Module: website
 
 ## Responsibility
-Hosts all static assets for the website, including the Tailwind CSS runtime. Acts as the single presentation module — serves HTML to browsers and delegates styling to the bundled Tailwind runtime.
+Static marketing site for the platform. Delivers branded landing pages to web browsers with no server-side rendering or build pipeline.
 
 ## Key Components
 | Component | Path | Kind | Role |
-|-----------|------|------|------|
-| Tailwind runtime | `website/assets/js/tailwind.min.js` | JavaScript bundle | CSS utility engine; processes DOM class names and injects styles |
-
-## Internal Structure
-- `website/assets/js/` — JavaScript assets
-  - `tailwind.min.js` — 947 symbols (442 functions, 505 methods); all are internal to the Tailwind engine
+|---|---|---|---|
+| Landing page | `website/index.html` | HTML | Primary entry point served to visitors |
+| Tailwind runtime | `website/assets/js/tailwind.min.js` | JavaScript bundle | CSS utility engine; processes DOM class names and injects styles at runtime |
 
 ## Dependencies
-- **External:** None at runtime; Tailwind runtime is fully self-contained
-- **Build-time:** None inferred (CDN/runtime mode; no bundler configuration present)
+- **External:** None at runtime — the Tailwind CDN runtime is self-contained
+- **Build-time:** None (no bundler or PostCSS pipeline)
 
 ## Notes
-- No application JavaScript beyond the Tailwind runtime is present in the analysed structure
-- HTML source files are not included in `structure.json`; they are assumed to exist alongside the JS asset
-- Future application code added to this module should be placed under `website/assets/js/` (or a sibling directory) to follow existing conventions
+- All styling is expressed through Tailwind utility classes in HTML attributes
+- The Tailwind runtime runs entirely in the browser; no build step is required
+- No application JavaScript beyond the Tailwind runtime is present

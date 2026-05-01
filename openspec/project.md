@@ -1,20 +1,27 @@
 # Project
 
 ## Purpose
-Static website project. Delivers web pages styled exclusively through Tailwind CSS utility classes processed at runtime in the browser.
+Thannigo is a hyperlocal delivery and marketplace platform. It connects customers with local shops for on-demand ordering and delivery, and provides shop owners and delivery personnel with dedicated management interfaces.
 
 ## Tech Stack
-- **Language:** JavaScript
-- **Styling framework:** Tailwind CSS (browser CDN runtime — `tailwind.min.js`)
-- **Deployment model:** Static (no server-side rendering or build step inferred)
+- **Backend:** Node.js, Express, MySQL (Sequelize ORM), Redis (BullMQ), Socket.io, Firebase Admin
+- **Frontend:** React Native (Expo), TypeScript, Expo Router, NativeWind (Tailwind), Zustand
+- **Website:** Static HTML, Tailwind CSS (browser CDN runtime)
+- **Payments:** Razorpay
+- **Notifications:** Firebase Cloud Messaging, Nodemailer
+- **Auth:** JWT (access + refresh tokens), OTP via SMS/email
 
 ## Architecture Style
-Static frontend — single-layer presentation with no inferred backend.
+Layered multi-tier: REST API backend, mobile frontend, static marketing website. Backend uses a service-controller-model pattern with async job queues for background work and real-time updates via WebSockets.
 
 ## Key Modules
-- [`website`](specs/modules/website.md) — the website frontend, containing static assets
+- [`backend`](specs/modules/backend.md) — REST API server handling all business logic
+- [`frontend`](specs/modules/frontend.md) — Cross-platform React Native mobile app (customer, shop, delivery roles)
+- [`website`](specs/modules/website.md) — Static marketing/landing pages
 
 ## Constraints
-- No backend, API layer, or database is present in the analysed structure
-- Tailwind CSS runs entirely in the browser via the CDN runtime; no PostCSS/build pipeline is visible
-- All styling decisions are expressed through HTML class attributes rather than authored CSS
+- Backend serves three distinct user roles: customer, shop owner, delivery person, and admin
+- Real-time order tracking is delivered over Socket.io
+- Background jobs (notifications, payouts, queue draining) run via BullMQ on Redis
+- Payment processing is exclusively through Razorpay
+- All API routes are versioned under `/v1`

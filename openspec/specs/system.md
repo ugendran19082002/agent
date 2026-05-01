@@ -1,19 +1,35 @@
 # System Overview
 
 ## Description
-A static website that uses the Tailwind CSS browser runtime to apply utility-first styles. The runtime scans the DOM for Tailwind class names and injects the corresponding CSS dynamically.
+Thannigo is a three-tier hyperlocal delivery platform. The backend exposes a versioned REST API consumed by the mobile app. A separate static website serves marketing content.
 
 ## Modules
-| Module | Path | Role |
-|--------|------|------|
-| website | `website/` | All frontend assets; single logical unit |
+| Module | Role |
+|---|---|
+| `backend` | API server — auth, orders, shops, delivery, payments, admin |
+| `frontend` | React Native app — customer, shop owner, delivery person UIs |
+| `website` | Static marketing pages |
 
 ## Entry Points
-- `website/assets/js/tailwind.min.js` — Tailwind CSS runtime; auto-executes on browser load, processes utility classes in the DOM
+- **Backend:** `backend/src/server.js` — binds Express app and Socket.io to a TCP port
+- **Backend app:** `backend/src/app.js` — Express app setup, middleware stack, route mounting
+- **Frontend root:** `frontend/app/_layout.tsx` — Expo root layout, session bootstrapping
+- **Frontend tabs:** `frontend/app/(tabs)/_layout.tsx` — customer tab navigator
+- **Website:** `website/index.html` — static landing page
+
+## Domain Packages
+- [`auth`](packages/auth.md) — identity, OTP, JWT tokens
+- [`shop`](packages/shop.md) — shop profiles, schedules, promotions, settings
+- [`order`](packages/order.md) — order lifecycle, slots, status tracking
+- [`delivery`](packages/delivery.md) — fleet, assignments, charge requests
+- [`payment`](packages/payment.md) — Razorpay integration, refunds, payouts
+- [`admin`](packages/admin.md) — admin controls, analytics, categories
+- [`engagement`](packages/engagement.md) — loyalty, referrals, ratings, coupons, complaints
 
 ## External Systems
-- None inferable from the analysed structure. The Tailwind runtime is self-contained and requires no external API calls at runtime.
-
-## Key Characteristics
-- 947 internal symbols (442 functions, 505 methods) in the Tailwind runtime — these are implementation details of the CSS engine, not application logic
-- No application-level JavaScript modules, frameworks, or components are present in the analysed structure
+- **Razorpay** — payment gateway
+- **Firebase** — push notifications (FCM)
+- **Mapbox / Google Maps** — map rendering and geocoding in mobile app
+- **Redis** — BullMQ job queue broker
+- **MySQL** — primary relational data store
+- **SMTP (Nodemailer)** — transactional email
