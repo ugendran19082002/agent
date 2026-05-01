@@ -6,17 +6,17 @@
 
 ## 2. Backend Standardization
 
-- [ ] 2.1 Add `express-validator` to project dependencies if missing
-- [ ] 2.2 Create validation schemas for Order, Payment, and Delivery routes
-- [ ] 2.3 Refactor `sendError` utility and standardize status codes in `routes/v1/`
-- [ ] 2.4 Apply validation middleware to target routes and verify error shapes
+- [x] 2.1 Add `express-validator` to project dependencies if missing
+- [x] 2.2 Create validation schemas for Order, Payment, and Delivery routes
+- [x] 2.3 Refactor `sendError` utility and standardize status codes in `routes/v1/`
+- [x] 2.4 Apply validation middleware to target routes and verify error shapes
 
 ## 3. Razorpay Native SDK Integration
 
-- [ ] 3.1 Verify `react-native-razorpay` installation and link native modules
-- [ ] 3.2 Refactor `checkout.tsx` payment logic to use `RazorpayCheckout.open` in production
-- [ ] 3.3 Implement `__DEV__` guard for WebView fallback in Expo Go
-- [ ] 3.4 Unify success/failure callback handling across both implementations
+- [x] 3.1 Verify `react-native-razorpay` installation and link native modules
+- [x] 3.2 Refactor `checkout.tsx` payment logic to use `RazorpayCheckout.open` in production
+- [x] 3.3 Implement `__DEV__` guard for WebView fallback in Expo Go
+- [x] 3.4 Unify success/failure callback handling across both implementations
 
 ## 4. Frontend UI State Refinement
 
