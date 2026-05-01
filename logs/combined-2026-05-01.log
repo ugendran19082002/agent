@@ -1,0 +1,6 @@
+{"level":"error","message":"ENV001:Error: Environment variable DB_HOST is not defined","timestamp":"2026-05-01T12:38:50.871Z"}
+{"level":"error","message":"ENV001:Error: Environment variable DB_PORT is not defined","timestamp":"2026-05-01T12:38:50.876Z"}
+{"level":"error","message":"ENV001:Error: Environment variable DB_USER is not defined","timestamp":"2026-05-01T12:38:50.877Z"}
+{"level":"error","message":"ENV001:Error: Environment variable DB_PASSWORD is not defined","timestamp":"2026-05-01T12:38:50.877Z"}
+{"level":"error","message":"ENV001:Error: Environment variable DB_NAME is not defined","timestamp":"2026-05-01T12:38:50.878Z"}
+{"level":"error","message":"ENV001:Error: Environment variable ENVIRONMENT is not defined","timestamp":"2026-05-01T12:38:50.878Z"}
