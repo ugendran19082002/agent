@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Decomposed Checkout Component
 The `checkout.tsx` screen SHALL be refactored into focused, reusable sub-components.
@@ -13,6 +13,8 @@ Each sub-component of the checkout SHALL manage its own UI logic while reporting
 #### Scenario: Coupon Application
 - **WHEN** a user enters a coupon in the `CouponInput` sub-component
 - **THEN** the sub-component SHALL handle the validation UI and notify the parent checkout state of the discount change
+
+## ADDED Requirements
 
 ### Requirement: Conditional deposit line item in order pricing breakdown
 The checkout pricing breakdown SHALL display a deposit line when the order includes a deposit charge, and SHALL show ₹0 or hide the deposit line when no deposit applies.
