@@ -31,7 +31,7 @@
 
 ## 6. Verify
 
-- [ ] 6.1 Run the migration script against a local dev database and confirm `SHOW TABLES` shows `product_categories` and `product_subcategories`
-- [ ] 6.2 Confirm row counts match pre-migration counts for both tables
-- [ ] 6.3 Start the backend server locally and confirm no Sequelize startup errors
-- [ ] 6.4 Smoke-test a category list API call and confirm it returns data
+- [x] 6.1 Run the migration script against a local dev database and confirm `SHOW TABLES` shows `product_categories` and `product_subcategories`
+- [x] 6.2 Confirm row counts match pre-migration counts for both tables
+- [x] 6.3 Start the backend server locally and confirm no Sequelize startup errors
+- [x] 6.4 Smoke-test a category list API call and confirm it returns data

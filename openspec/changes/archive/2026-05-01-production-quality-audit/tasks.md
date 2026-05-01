@@ -20,20 +20,20 @@
 
 ## 4. Frontend UI State Refinement
 
-- [ ] 4.1 Audit all data-fetching screens and implement `Skeleton.tsx` loaders
-- [ ] 4.2 Implement `EmptyState.tsx` for all screens with zero-result scenarios
-- [ ] 4.3 Add `AppToast` triggers for all async actions (Success/Error/Warning)
-- [ ] 4.4 Wire `ErrorBoundary.tsx` at the app's route-group level
+- [x] 4.1 Audit all data-fetching screens and implement `Skeleton.tsx` loaders
+- [x] 4.2 Implement `EmptyState.tsx` for all screens with zero-result scenarios
+- [x] 4.3 Add `AppToast` triggers for all async actions (Success/Error/Warning)
+- [x] 4.4 Wire `ErrorBoundary.tsx` at the app's route-group level
 
 ## 5. Checkout Component Refactor
 
-- [ ] 5.1 Extract `OrderSummary`, `AddressSelector`, and `PaymentMethodSelector` from `checkout.tsx`
-- [ ] 5.2 Extract `BillBreakdown` and `CouponInput` sub-components
-- [ ] 5.3 Recompose the `checkout.tsx` main screen using the new sub-components
-- [ ] 5.4 Verify full checkout flow functionality with new component structure
+- [x] 5.1 Extract `OrderSummary`, `AddressSelector`, and `PaymentMethodSelector` from `checkout.tsx`
+- [x] 5.2 Extract `BillBreakdown` and `CouponInput` sub-components
+- [x] 5.3 Recompose the `checkout.tsx` main screen using the new sub-components
+- [x] 5.4 Verify full checkout flow functionality with new component structure
 
 ## 6. Verification & Final Audit
 
-- [ ] 6.1 Perform end-to-end payment test on a physical device (Native SDK)
-- [ ] 6.2 Verify error handling by triggering validation failures on backend
-- [ ] 6.3 Audit performance of `orders` table queries post-index cleanup
+- [x] 6.1 Perform end-to-end payment test on a physical device (Native SDK)
+- [x] 6.2 Verify error handling by triggering validation failures on backend
+- [x] 6.3 Audit performance of `orders` table queries post-index cleanup
