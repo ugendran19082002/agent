@@ -1,14 +1,14 @@
-# ThanniGo — Product Requirements Document v2.0 | CONFIDENTIAL
+# ThanniGo — Product Requirements Document v2.1 | CONFIDENTIAL
 
 **ThanniGo**  
 Hyperlocal Water Delivery Platform
 
 **PRODUCT REQUIREMENTS DOCUMENT**  
-PRD v2.0 | Based on OpenSpec v2.6
+PRD v2.1 | Based on OpenSpec v2.6
 
 | **Field** | **Detail** |
 |---|---|
-| Document Version | PRD v2.0 (Updated) |
+| Document Version | PRD v2.1 |
 | Based On | OpenSpec v2.6 (Production) |
 | App Name | ThanniGo |
 | Platform | React Native (iOS & Android) — Single App, 4 Roles |
@@ -83,6 +83,8 @@ This PRD covers MVP scope only. Features marked Phase 2 are documented for conte
 - All three customer-facing roles (Customer, Shop Owner, Delivery Person) plus Admin share the same React Native app with role-based routing post-login.
 - Payment gateway is Razorpay only. All refunds return to original payment method.
 - Only two can sizes supported: 20L and 10L, tracked independently per customer.
+- Water can deposit amounts are set platform-wide by Admin — not configurable per shop.
+- There is no customer wallet. Deposit refunds are applied as real-time discounts on the next order.
 - Loyalty points have a fixed 6-month expiry from earning date.
 - Push notifications + email are the primary communication channels. SMS is OTP fallback only.
 - Delivery person accounts are created by shop owners — no self-registration.
@@ -575,17 +577,23 @@ Admin manages platform-wide configurable settings from a dedicated System Settin
 | **Setting** | **Description** | **Default** |
 |---|---|---|
 | Order Accept Timeout | Minutes before order auto-rejects if shop doesn't respond | 10 minutes |
-| COD Block Threshold | Number of failed/cancelled COD orders before COD is disabled | 3 |
+| COD Block Threshold | Number of failed/cancelled COD orders before COD is disabled (cod_failed_count) | 3 |
 | Refund Window (days) | Rolling window for UPI cancellation tier tracking | 30 days |
 | OTP Expiry (minutes) | OTP validity duration | 5 minutes |
 | Max OTP Attempts | Max wrong OTP attempts before cooldown | 3 |
 | OTP Cooldown (minutes) | Cooldown period after max OTP attempts | 10 minutes |
 | Loyalty Points Expiry (months) | Months from earning date before points expire | 6 months |
-| COD Starting Limit | Initial COD order limit for new customers | 5 |
-| COD Max Limit | Maximum COD limit a customer can reach | 10 |
+| COD Trust Score — Starting Value | Initial cod_trust_score for new customers | 5 |
+| COD Trust Score — Max Value | Maximum cod_trust_score a customer can reach | 10 |
+| COD Trust Score — Recovery Rate | Number of successful COD deliveries required for +1 trust score | 5 deliveries |
 | Max Saved Addresses | Maximum delivery addresses per customer | 5 |
-| No-Response Wait Time (minutes) | Time delivery person must wait before marking no response | 10 minutes |
-| No-Response Call Attempts | Minimum logged call attempts before marking no response | 2 |
+| No-Response Wait Time (minutes) | Auto-close timer duration after 2nd call is logged | 10 minutes |
+| No-Response Call Attempts | Minimum logged call attempts before timer starts | 2 |
+| 20L Can Deposit Amount (₹) | Platform-wide deposit charged when 20L can is not returned | ₹200 |
+| 10L Can Deposit Amount (₹) | Platform-wide deposit charged when 10L can is not returned | ₹100 |
+| Pending Can Warning Threshold | Number of pending cans before customer sees warning | 2 |
+| Pending Can Block Threshold | Number of pending cans before checkout is blocked | 3 |
+| Return Confirmation Timeout (minutes) | Time before Admin can force-close an unconfirmed can return | 60 minutes |
 
 ## 7.6 Platform Coupon Management
 
@@ -677,7 +685,7 @@ Shop owner can create, edit, and delete product categories and sub-categories.
 | Product Images | Yes | Min 1, max 5 images, JPEG/PNG, max 3MB each (stored on Hetzner) |
 | Is Water Product | Yes | Toggle: Yes/No — enables deposit logic if Yes |
 | Can Size (if water) | Conditional | 20L or 10L — required if is_water = true |
-| Deposit Amount (if water) | Conditional | Positive number — shop-configurable per can size |
+| Deposit Amount (if water) | Conditional | Read-only — displays platform-wide rate set by Admin. Not editable by shop owner. |
 | Product Active/Inactive | Yes | Toggle — inactive products hidden from customer app |
 
 #### Product Negative Scenarios
@@ -769,9 +777,19 @@ Recalculates instantly as inputs change. Shows: Items Total, Floor Charge, Lift 
 
 ### 8.6.3 Reject Flow
 
-- System presents customer with two separate options:
-  - **Option A — Switch Shop:** system finds alternative shop. If new price is higher, customer must approve the difference. If lower, customer receives automatic refund of the difference.
-  - **Option B — Refund:** order closed, full refund to original payment method (online orders). COD orders: no charge.
+- System presents customer with two separate options on a reject resolution screen:
+
+**Option A — Switch Shop:**
+- System auto-suggests the nearest available shop with the same items (nearest first, cheapest as tiebreaker).
+- Customer can accept the auto-suggestion or browse alternative shops from a filtered list.
+- If new shop price is **higher** → customer must explicitly approve the difference before switch proceeds.
+- If new shop price is **lower** → for online orders, difference is automatically refunded. For COD orders, customer simply pays the lower amount at delivery — no refund action needed.
+- If customer declines the switch → falls back to Refund option.
+- Switch Shop result is shown in-app on the reject resolution screen only — no push notification.
+
+**Option B — Refund:**
+- Order closed. Full refund to original payment method (online orders). COD orders: no charge.
+- Shop-initiated refunds do NOT count toward the customer's UPI cancellation tier.
 
 > ⚠ Refund and Switch options are always presented as separate, distinct choices. They are never combined.
 
@@ -831,6 +849,8 @@ Recalculates instantly as inputs change. Shows: Items Total, Floor Charge, Lift 
 | Shop Cards | Shop name, category, distance, delivery time estimate, rating, Open/Closed status |
 | Active Order Banner | Shown if customer has an order in progress — taps to tracking screen |
 | Loyalty Points Badge | Current points balance shown in header |
+| Offers Section | Dedicated card showing available platform (Admin) coupons — also enterable manually at checkout |
+| Pending Can Warning Banner | Persistent banner shown when pending_cans ≥ 2 — "You have [X] empty cans pending. Please return to continue ordering." Hidden when pending_cans < 2 |
 | Filter Options | Filter by: category, delivery time, shop type (residential/commercial) |
 
 - GPS coordinates fetched on home screen load (Mapbox). If GPS denied → prompt to enter address manually.
@@ -861,12 +881,15 @@ Recalculates instantly as inputs change. Shows: Items Total, Floor Charge, Lift 
 | Delivery Address | Customer's saved address (max 5) or option to add new |
 | Floor & Delivery Preferences | Floor number, door delivery preference — saved for future orders |
 | Water Can Deposit Section | Shown only for water products — deposit logic applied automatically |
+| Pending Can Deposit Line | If pending_cans > 0, deposit for unreturned cans auto-added to order total |
+| Deposit Credit Line | If customer_deposit_balance > 0, shown as "Deposit Credit: −₹[X]" — applied automatically |
 | Coupon Code Field | Text input for coupon code + Apply button |
 | Loyalty Points Toggle | Option to redeem points (up to 20% of bill) |
 | Order Type Selection | COD or Online Payment (Razorpay) |
-| Price Breakdown | Items total, floor charge, delivery charge, discount, deposit, final total |
+| Price Breakdown | Items total, floor charge, delivery charge, pending can deposit, deposit credit, discount, new can deposit, final total |
 | Minimum Order Notice | Warning if cart is below shop's minimum order value |
-| Place Order Button | Disabled until all required fields complete |
+| Pending Can Block Notice | If pending_cans ≥ 3: "Checkout blocked — 3 empty cans pending. Return cans or deposit will be charged." |
+| Place Order Button | Disabled if pending_cans ≥ 3 (block threshold) OR any required field incomplete |
 
 ### Cart Negative Scenarios
 
@@ -884,17 +907,31 @@ Recalculates instantly as inputs change. Shows: Items Total, Floor Charge, Lift 
 
 ## 9.4 Order Cancellation Flow
 
-| **Stage** | **Cancellation Allowed** | **Refund** | **Penalty** | **Can Balance Impact** |
-|---|---|---|---|---|
-| Before shop accepts | Yes | 100% full refund | None | No change |
-| After accept, before pickup | Yes | 100% full refund | None | No change |
-| After pickup (Picked state) | Not allowed | No refund / partial only | COD LIMIT -1 if forced | No change — can not given yet |
+| **Stage** | **Cancel Allowed** | **UI** | **Refund (UPI)** | **Refund (COD)** | **Penalty** | **Can Balance** |
+|---|---|---|---|---|---|---|
+| Before shop accepts | Yes | Cancel button visible | 100% (tier ignored) | No charge | None | No change |
+| After accept, before pickup | Yes | Cancel button visible | 100% (tier ignored) | No charge | None | No change |
+| After pickup (Picked) | With penalty | Cancel button visible + warning dialog | UPI tier applies (see 9.5) | No charge; cod_failed_count +1 | cod_trust_score −1; cod_failed_count +1 | No change — can not delivered |
 
-> ⚠ Cancellation after Picked state is not permitted. If forced, order is marked 'cancelled_after_pickup' and COD limit is decremented by 1.
+> ⚠ **Before Pickup rule:** Regardless of UPI cancellation tier, any cancellation before the Picked state always gives 100% refund. Tier penalties only apply after Picked.
+
+> ⚠ **After Picked cancel flow:**
+> 1. Customer taps Cancel — warning dialog shown: "Cancelling now will result in a penalty. Your refund will be [X]% based on your cancellation history. Confirm?"
+> 2. Customer confirms → order marked `cancelled_after_pickup`
+> 3. Deposit (if charged) → always 100% refunded separately, regardless of tier
+> 4. Order total → UPI tier refund applied to remaining amount
+> 5. Delivery person receives in-app prompt: "Order cancelled. Return can to shop."
+> 6. Delivery person taps "Return to Shop" → push notification sent to shop owner
+> 7. Shop owner confirms receipt in app → order fully closed
+> 8. If shop owner does not confirm within 60 minutes → Admin can force-close. All three parties notified.
+
+> ⚠ **Shop-rejected refunds** do NOT count toward the customer's 30-day UPI cancellation tier. Only customer-initiated cancellations count.
 
 ## 9.5 UPI Order — Tiered Refund System
 
-When a customer cancels a UPI/Online order, the refund amount is determined by their cancellation history within the past 30 days.
+The tiered refund system applies **only to customer-initiated cancellations after the Picked state**. Before Picked, refund is always 100% regardless of tier.
+
+The refund amount is determined by the customer's cancellation count within the past 30-day rolling window.
 
 | **Cancellation Count (30-day window)** | **Refund Amount** | **Warning Shown** |
 |---|---|---|
@@ -903,15 +940,45 @@ When a customer cancels a UPI/Online order, the refund amount is determined by t
 | 3rd cancellation | 10% refund | Final Warning — full-screen modal + push notification |
 | 4th+ cancellation | 0% refund | No refund modal shown |
 
-> ℹ A hidden lifetime cancellation counter is also maintained for abuse tracking. If abuse patterns are detected (high lifetime + repeated monthly misuse), COD can be disabled and stricter controls applied.
+**Counter rules:**
+- Counter increments on every customer-initiated cancellation after Picked — including 4th+ (0% refund). No ceiling.
+- Shop-initiated rejections do NOT increment this counter.
+- Deposit amount is always refunded 100% separately, even when order refund is 0%.
+- A hidden `lifetime_cancellations` counter is maintained for abuse pattern detection.
 
-> ⚠ Tiered refund applies to UPI/Online orders ONLY. COD orders have no prepayment, so refund tiers do not apply.
+> ⚠ Tiered refund applies to UPI/Online orders ONLY. COD orders have no prepayment — no refund tiers apply to COD.
 
-## 9.6 COD Abuse Control
+## 9.6 COD Control Systems
 
-- System tracks failed/cancelled COD orders per customer.
-- After 3 failed/cancelled COD orders → COD option is disabled for that customer.
-- Customer sees prompt: 'Cash on Delivery is not available for your account. Please use Online Payment.'
+Two independent COD control mechanisms exist. Either reaching its threshold independently blocks COD for that customer.
+
+### System 1 — COD Abuse Block (`cod_failed_count`)
+
+Tracks hard failures and post-pickup cancellations.
+
+| **Event** | **cod_failed_count Change** |
+|---|---|
+| Customer cancels after Picked | +1 |
+| Failed COD delivery (customer fault) | +1 |
+
+- Reaches 3 → COD immediately and permanently blocked regardless of trust score.
+- Customer sees: "Cash on Delivery is not available for your account. Please use Online Payment."
+
+### System 2 — COD Trust Score (`cod_trust_score`)
+
+Tracks behavioural reliability. Starts at 5, maximum 10.
+
+| **Event** | **cod_trust_score Change** |
+|---|---|
+| Customer cancels after Picked | −1 |
+| No-response at delivery (repeat offence) | −1 |
+| No-response (severe / repeated pattern) | −2 (admin reviewable) |
+| Every 5 successful COD deliveries completed | +1 (capped at max 10) |
+
+- Reaches 0 → COD blocked.
+- Customer sees: "Cash on Delivery is not available for your account. Please use Online Payment."
+
+> ℹ No-response first offence = warning only. No trust score change on first occurrence.
 
 ## 9.7 Payment Flow
 
@@ -947,6 +1014,9 @@ When a customer cancels a UPI/Online order, the refund amount is determined by t
 | Out for Delivery | En route to customer | Yes — live GPS tracking on Mapbox |
 | Arriving Soon | Delivery person within 500m | Yes — with ETA |
 | Delivered | Order handed over | No — confirmation shown |
+| Failed Delivery | No-response auto-close triggered | No — penalty notice shown |
+| Cancelled After Pickup | Customer cancelled after Picked | No — refund/penalty notice shown |
+| Return to Shop | Delivery person returning can to shop | No — status shown to all parties |
 
 ## 9.9 Order History
 
@@ -955,7 +1025,14 @@ When a customer cancels a UPI/Online order, the refund amount is determined by t
 | Order List | All past orders, newest first |
 | Status Filter | All / Completed / Cancelled / Refunded |
 | Order Card | Shop name, date, items summary, total, status badge |
-| Reorder Button | Available on completed orders — adds same items to cart (same shop) |
+| Reorder Button | Available on completed orders — rebuilds cart from previous order |
+
+**Reorder smart behaviour:**
+- System checks availability of each item at the time of reorder.
+- Available items are added to cart automatically.
+- Unavailable items (shop closed, product deactivated) are removed with no error blocking the flow.
+- Customer is shown a warning listing exactly which items were removed.
+- Deposit line item appears/disappears automatically in the rebuilt cart based on current can balance — same as a fresh order.
 
 ## 9.10 Post-Delivery Feedback
 
@@ -1028,26 +1105,29 @@ The Delivery Person role is a dashboard within the same React Native app. Accoun
 |---|---|
 | 1 | Call customer (1st attempt) — log call in app |
 | 2 | Call customer (2nd attempt) — log call in app |
-| 3 | 10-minute timer starts automatically after 2nd call is logged |
-| 4 | After 10 minutes with no response → system auto-closes order, marks as 'failed_delivery' |
-
-> ℹ Combined flow: delivery person must make 2 logged calls AND wait 10 minutes after the 2nd call before the system auto-closes. Manual "Mark No Response" is replaced by the 10-minute auto-close timer.
+| 3 | 10-minute timer starts automatically after 2nd call is logged — no manual tap needed |
+| 4 | After 10 minutes with no response → system auto-closes order, marks as `failed_delivery` |
+| 5 | System auto-triggers return flow — delivery person receives in-app prompt: "Order auto-closed. Return can to shop." |
+| 6 | Delivery person taps "Return to Shop" → push notification sent to shop owner immediately |
+| 7 | Shop owner confirms receipt → order status → `closed` |
+| 8 | If shop owner does not confirm within 60 minutes → Admin can force-close. Customer, shop owner, and delivery person all notified. |
 
 | **Occurrence** | **Penalty** |
 |---|---|
-| First time | Warning shown to customer. No COD score change. |
-| Repeat offence | COD Limit -1 per occurrence |
-| Severe / repeated pattern | COD Limit -2 (admin reviewable) |
+| First time | Warning shown to customer. No `cod_trust_score` change. |
+| Repeat offence | `cod_trust_score` −1 per occurrence |
+| Severe / repeated pattern | `cod_trust_score` −2 (admin reviewable) |
+
+> ℹ No-response events do NOT increment `cod_failed_count`. Only `cod_trust_score` is affected (from 2nd offence onwards).
 
 ## 10.6 Extra Charge Request Flow
 
 - Delivery person taps 'Raise Change Request' → selects reason (floor changed / distance changed).
 - System sends in-app approval request to customer.
-- Customer Approves → charge added → delivery proceeds.
-- Customer Declines or no response (5 min) → no extra charge. Delivery proceeds without extra charge.
-- If customer declines: partial refund (delivery charge deducted) is applied.
+- Customer Approves → charge added to order → delivery proceeds.
+- Customer Declines or no response within 5 minutes → no extra charge. Delivery proceeds at original order amount. No refund or adjustment of any kind.
 
-> ⚠ No approval = No charge. Delivery person cannot manually collect any extra amount outside the in-app approval flow.
+> ⚠ No approval = No charge. Delivery person cannot manually collect any extra amount outside the in-app approval flow. This applies to both COD and online orders.
 
 ## 10.7 Delivery Log Codes
 
@@ -1058,12 +1138,15 @@ The Delivery Person role is a dashboard within the same React Native app. Accoun
 | DEL0003 | Delivery photo upload failed | ERROR |
 | DEL0004 | Extra charge request submitted | INFO |
 | DEL0005 | Customer approved extra charge | INFO |
-| DEL0006 | Customer declined extra charge | INFO |
+| DEL0006 | Customer declined extra charge — delivery proceeds at original amount | INFO |
 | DEL0007 | No response — auto-close triggered | WARN |
 | DEL0008 | Empty can collected | INFO |
 | DEL0009 | Empty can not collected — deposit added | WARN |
 | DEL0010 | GPS tracking failed (Mapbox) | ERROR |
 | DEL0011 | Availability toggle OFF during active delivery | WARN |
+| DEL0012 | Return to Shop initiated — delivery person confirmed | INFO |
+| DEL0013 | Shop owner confirmed can return receipt | INFO |
+| DEL0014 | Return confirmation timeout — Admin force-close eligible | WARN |
 
 ---
 
@@ -1071,36 +1154,92 @@ The Delivery Person role is a dashboard within the same React Native app. Accoun
 
 ## 11.1 Overview
 
-The water can system manages deposit charges, empty can tracking, and refill pricing. All products carry an is_water flag. Water products trigger deposit logic. Normal products skip it entirely.
+The water can system manages deposit charges, empty can tracking, pending return tracking, and deposit credit logic. All products carry an `is_water` flag. Water products trigger deposit logic. Normal products skip it entirely.
 
-## 11.2 Deposit Logic
+All balances and counters are tracked **independently per can size** — 20L and 10L have completely separate counters.
 
-| **Customer Can Balance** | **Deposit Charged** | **Balance After Order** |
+Deposit amounts are **platform-wide, set by Admin** in System Settings. Shop owners cannot override them. The deposit amount is shown as read-only on the product form.
+
+There is **no customer wallet**. Deposit refunds are applied as real-time discounts on the next order total. Excess credit is tracked internally as `customer_deposit_balance` and auto-applied to future orders.
+
+## 11.2 Key Data Fields (per can size)
+
+| **Field** | **Type** | **Description** |
 |---|---|---|
-| 0 (new customer or no can) | Yes — deposit + water price | Balance +1 (new can issued) |
-| > 0 (has empty can to return) | No — water price only | Balance -1 (can returned at delivery) |
-| > 0 but does not return can | Deposit auto-added at delivery | Balance unchanged |
+| `total_cans_given` | Integer | Total full cans delivered to this customer |
+| `total_cans_returned` | Integer | Total empty cans collected from this customer |
+| `pending_cans` | Integer | Cans given but not yet returned (balance not returned) |
+| `customer_deposit_balance` | Decimal | Internal deposit credit available to apply on next order |
 
-> ℹ Balance tracked independently per can size: 20L and 10L. Formula: balance = total_cans_given − total_empty_returned. Balance can never go below zero.
+**Formula:** `pending_cans = total_cans_given − total_cans_returned`  
+Balance can never go below zero.
 
-## 11.3 Smart Auto-Detection at Checkout
+## 11.3 Deposit Logic at Checkout
 
-- Customer adds water product to cart → system checks user's can balance for that can size.
-- If balance > 0 → deposit = ₹0 (or hidden with label 'Empty can on hand').
-- If balance = 0 → deposit amount added to order total.
-- Price breakdown updated in real-time on cart screen.
+System auto-detects can status and applies pricing without any manual input.
 
-## 11.4 Delivery Side — Empty Can Collection
-
-| **Scenario** | **App Action** | **Balance Impact** |
+| **Customer Situation** | **Deposit Charged** | **pending_cans After** |
 |---|---|---|
-| Empty can present and collected | Check 'Empty collected' checkbox | Customer balance -1 |
-| Empty can not present | Leave unchecked | No balance change. Deposit auto-added to order. |
-| Customer claimed can but not there | Select 'Empty not collected' | Deposit added. Customer notified. Balance unchanged. |
+| New customer / balance = 0 | Yes — platform deposit rate | +1 |
+| Has pending can (pending_cans > 0) | No — return expected at delivery | Unchanged until delivery |
+| Has pending_cans > 0 but previously paid deposit | No additional deposit — already charged | Unchanged |
+
+**Checkout price breakdown (water product):**
+```
+Water Price:          ₹[price]
+Pending Can Deposit:  ₹[X]   ← auto-added if unpaid deposit exists
+Deposit Credit:      −₹[X]   ← auto-applied from customer_deposit_balance (if any)
+─────────────────────────────
+Total:                ₹[final]
+```
+
+> ℹ `customer_deposit_balance` is shown as a line item "Deposit Credit: −₹[X]" and applied automatically. No customer action needed.
+
+## 11.4 Pending Can Warning & Block System
+
+| **pending_cans** | **Action** |
+|---|---|
+| 0–1 | Normal — no warning |
+| 2 | Warning threshold — persistent banner on home screen + highlighted warning at checkout. No push notification. Customer can still order. |
+| 3+ | Block threshold — push notification sent immediately. Checkout is blocked. Customer can browse and add to cart but cannot complete order. |
+
+**Warning banner text:** "You have [X] empty cans pending. Please return them to continue ordering."
+
+**Block message at checkout:** "Checkout blocked — [X] empty cans pending. Return cans at next delivery or deposit will be charged."
+
+**What unblocks a customer:**
+- Returning pending cans at delivery (delivery person confirms) → pending_cans decrements → block lifts automatically
+- Paying the deposit at checkout → pending_cans treated as deposit-paid → checkout unblocked
+
+Either condition lifts the block — whichever happens first.
+
+## 11.5 Delivery Side — Empty Can Collection
+
+| **Scenario** | **App Action** | **Impact** |
+|---|---|---|
+| Empty can present and collected | Check 'Empty collected' checkbox | `total_cans_returned` +1; `pending_cans` −1 |
+| Empty can not present | Leave unchecked | `pending_cans` unchanged. Deposit auto-added to order. |
+| Customer claimed can but not there | Select 'Empty not collected' | Deposit added. Customer notified. `pending_cans` unchanged. |
 
 > ⚠ The delivery person's app action is the source of truth for empty can collection. Customer's claim at order time is not binding.
 
-## 11.5 Water Can Log Codes
+## 11.6 Deposit Refund Flow (When Can is Returned)
+
+When delivery person marks "Empty collected":
+1. System calculates: `refund = returned_cans × deposit_per_can`
+2. Refund applied as real-time discount on current order total.
+3. If refund amount > current order total:
+   - Current order reduced to ₹0 (cannot go negative).
+   - Excess credited to `customer_deposit_balance` — auto-applied on next order.
+   - `customer_deposit_balance` never expires.
+
+## 11.7 Cancel-After-Pickup — Deposit Handling
+
+If order is cancelled after Picked state:
+- Deposit charged in the original order is **always 100% refunded separately**, regardless of which UPI refund tier applies to the rest of the order.
+- `pending_cans` is NOT incremented — can was never delivered to customer.
+
+## 11.8 Water Can Log Codes
 
 | **Log Code** | **Event** | **Severity** |
 |---|---|---|
@@ -1108,8 +1247,14 @@ The water can system manages deposit charges, empty can tracking, and refill pri
 | CAN0002 | Balance went below zero — prevented | ERROR |
 | CAN0003 | Deposit auto-added — can not returned | INFO |
 | CAN0004 | Deposit incorrectly not charged | ERROR |
+| CAN0005 | Pending can warning threshold reached (2 pending) | INFO |
+| CAN0006 | Pending can block threshold reached (3 pending) — checkout blocked | WARN |
+| CAN0007 | Deposit auto-charged at checkout for pending cans | INFO |
+| CAN0008 | Deposit credit applied as discount on current order | INFO |
+| CAN0009 | Excess deposit credited to customer_deposit_balance | INFO |
 
 ---
+
 
 # 12. Coupon System
 
@@ -1334,6 +1479,10 @@ A minimal complaint/dispute system is included in MVP. All roles can raise compl
 | Points credited | Customer | Push | +[X] loyalty points added to your account. |
 | Complaint resolved | Complainant | Push + Brevo Email | Your complaint has been resolved. View details. |
 | New shop application (to Admin) | Admin | Push + Brevo Email | New shop application from [Shop Name]. Review now. |
+| Pending can block (3 pending) | Customer | Push | Your checkout is blocked — 3 empty cans pending. Return at next delivery. |
+| Return to Shop initiated | Shop Owner | Push | [Delivery Person] is returning a can to your shop. Please confirm receipt. |
+| Admin force-closed unconfirmed return | Customer + Shop Owner + Delivery Person | Push | Order [#ID] return has been force-closed by Admin. |
+| Cancelled after pickup — return triggered | Delivery Person | In-app prompt | Order cancelled. Return the can to the shop and confirm. |
 
 ## 17.2 Notification Log Codes
 
@@ -1411,27 +1560,42 @@ A minimal complaint/dispute system is included in MVP. All roles can raise compl
 | **Field** | **Type** | **Description** |
 |---|---|---|
 | order_type | enum: cash / upi | Payment method selected by customer |
-| refund_stage | integer (1–4) | UPI cancellation tier (within 30-day window) |
-| cod_blocked | boolean | Whether COD is disabled for this customer |
-| delivery_status | enum | pending / picked / out_for_delivery / delivered / failed_delivery / cancelled_after_pickup |
+| refund_stage | integer (1–4) | UPI cancellation tier (within 30-day window) — only increments on customer-initiated post-pickup cancellations |
+| delivery_status | enum | pending / picked / out_for_delivery / arriving_soon / delivered / failed_delivery / cancelled_after_pickup / return_to_shop / closed |
 | auto_closed | boolean | True if order was auto-closed due to no-response timeout |
 | extra_charge | decimal | Extra charge amount approved by customer (floor/distance change) |
 | proof_image | string (URL) | Hetzner URL of delivery proof photo |
 | is_water | boolean | Whether order contains water can products |
 | deposit_charged | boolean | Whether deposit was charged on this order |
-| deposit_reason | string | Reason deposit was charged (new_customer / no_empty_return) |
+| deposit_amount | decimal | Actual deposit amount charged on this order |
+| deposit_refunded | boolean | Whether deposit was refunded (e.g., cancel-after-pickup) |
+| deposit_reason | string | Reason deposit was charged (new_customer / no_empty_return / pending_can) |
+| return_confirmed_at | timestamp | When shop owner confirmed can return receipt |
+| force_closed_by_admin | boolean | True if Admin force-closed an unconfirmed return |
 
 ## 19.2 User Fields
 
 | **Field** | **Type** | **Description** |
 |---|---|---|
-| cancellation_count_30d | integer | UPI cancellations in last 30 days (refund tier tracker) |
-| lifetime_cancellations | integer | Hidden lifetime counter for abuse detection |
-| cod_failed_count | integer | Count of failed/cancelled COD orders |
-| cod_blocked | boolean | True if COD is disabled after 3 COD failures |
+| cancellation_count_30d | integer | Customer-initiated post-pickup UPI cancellations in last 30 days (refund tier tracker) |
+| lifetime_cancellations | integer | Hidden lifetime counter for abuse pattern detection |
+| cod_failed_count | integer | Count of failed/cancelled COD orders — reaches 3 → COD blocked |
+| cod_trust_score | integer | COD behavioural trust score — starts 5, max 10, blocks at 0 |
+| cod_blocked | boolean | True if COD is disabled (either system reached threshold) |
+| successful_cod_deliveries | integer | Running count for trust score recovery (+1 score every 5) |
 | referral_code | string | Unique referral code for this customer |
 | referred_by | string (nullable) | Referral code used during registration |
 | first_login | boolean | True if delivery person has not yet set their own PIN |
+
+## 19.3 Water Can Fields (per customer, per can size)
+
+| **Field** | **Type** | **Description** |
+|---|---|---|
+| can_size | enum: 20L / 10L | Can size this record tracks |
+| total_cans_given | integer | Total full cans delivered to this customer |
+| total_cans_returned | integer | Total empty cans collected from this customer |
+| pending_cans | integer | Cans given but not yet returned (total_cans_given − total_cans_returned) |
+| customer_deposit_balance | decimal | Internal deposit credit balance — auto-applied at checkout, never expires |
 
 ---
 
@@ -1445,7 +1609,7 @@ The following features are designed and documented for context but are NOT part 
 | Support Tickets | Support | Formal support ticket system for customer + admin |
 | Order Splitting | Orders / Delivery | Split one order across multiple delivery persons |
 | QR Code on Can | Water Can | Individual can lifecycle tracking via QR scan |
-| Deposit Wallet | Water Can | Deposit stored as wallet balance, redeemable across orders |
+| Deposit Transaction History | Water Can | Customer-facing view of deposit charge and credit history. MVP: deposit credits applied automatically. Phase 2: customer can view full deposit transaction log. |
 | Lost Can Penalty | Water Can | Auto-penalty if can not returned after configurable days |
 | Auto-apply Coupons | Coupons | System auto-applies best eligible coupon at checkout |
 | Coupon Usage History | Coupons | Track which customer used which coupon, when, on which order |
@@ -1463,7 +1627,7 @@ The following features are designed and documented for context but are NOT part 
 |---|---|
 | PRD v1.0 | Initial draft — based on OpenSpec v2.6 |
 | PRD v2.0 | Major update: App name → ThanniGo. Removed web portal entirely. Admin moved to React Native app (same codebase). Mapbox replaces Google Maps. Brevo replaces SendGrid/AWS SES. MSG91 replaces Twilio. Node.js + Express + Sequelize added to stack. Socket.io replaces Firebase for real-time. Hetzner replaces AWS S3 for storage. Delivery person PIN flow updated (no SMS, first-login detection, shop owner reset). COD abuse rule simplified (block after 3 failures). Tiered UPI refund system added (30-day window + lifetime counter). Combined no-response protocol (2 calls + 10-min timer). Switch shop price-lower refund added. Extra charge decline = partial refund. Complaints system added to MVP. Referral system fully documented. Shop open/close toggle added. Customer cancellation flow fully documented. Admin dashboard expanded with 5 new tracking cards. System settings documented under Admin. Max 5 saved addresses. Auto-assignment (nearest) + manual reassign. Payout and Support deferred to Phase 2. |
-| PRD v2.0 (Updated) | Gap fill from v1.0: Stakeholders table added. SYS0001 force update screen added. Full AUTH error codes restored (AUTH0007–AUTH0013, AUTH0018, AUTH0019). Customer registration negative scenarios added (USER0001–USER0007). Shop onboarding negative scenarios added (SHOP0001–SHOP0018). Product/category negative scenarios added (PROD0001–PROD0010). Order negative scenarios added (ORD0001–ORD0008). Payment negative scenarios added (PAY0001–PAY0006) including critical PAY0006 auto-refund. Cart rule — one shop per order dialog documented. Admin log codes ADMIN0005–ADMIN0007 added. Admin shop list filters and table columns added. Coupon log codes CPN0004–CPN0007 added. Customer management log codes CUST0001–CUST0004 added. Notification log codes NOTIF0001–NOTIF0004 added. CAN0001–CAN0004 log codes added. Block/unblock confirmation dialog text added. Order history status filter added. Loyalty points screen full content added (progress bar, recent history, redemption info, expiry notice). Product rule panel fully detailed — all 5 sections with updated fields (Quantity, Delivery, Floor, Pricing with Bulk Discount MVP, Live Calculation Preview). Bulk discount MVP added (toggle + threshold + %). Reliability & Availability section added (99.5% uptime, graceful degradation, PAY0006 rollback). Payment idempotency rule documented. No-response protocol clarified (2 calls + 10-min auto-close combined flow). |
+| PRD v2.1 | Full flow review + 61 confirmed decisions applied. Cancellation flow: cancel-after-pickup button visible with penalty warning dialog; before-pickup always 100% refund (tier ignored); after-pickup follows UPI tier; deposit always refunded 100% on cancel-after-pickup. Return-to-shop flow added: delivery person marks return → shop owner confirms → 1-hour timeout → Admin force-close. `return_to_shop` added as formal delivery_status enum. COD system split into two independent mechanisms: `cod_failed_count` (abuse block at 3) and `cod_trust_score` (starts 5, max 10, blocks at 0, +1 every 5 successful deliveries). Cancel-after-pickup affects both counters; no-response affects trust score only. Switch shop: auto-suggests nearest+cheapest, customer can browse alternatives; COD lower price = customer pays new amount at delivery. UPI tier counter: shop-rejected refunds do not count; 4th+ cancellations still increment; tier only applies after Picked. Extra charge decline partial refund removed — delivery proceeds at original amount for both order types. Reorder smart behaviour: available items added, unavailable removed with warning, deposit auto-detected. Water can system fully rewritten: deposit+pending tracking combined; platform-wide deposit rates (20L/10L) in System Settings; pending can warning at 2 (in-app only) and block at 3 (push+checkout block); deposit refund = real-time discount on current order; excess → `customer_deposit_balance` (never expires, auto-applied); deposit field on product form → read-only. Offers section added to Customer Home Screen for platform coupons. Admin System Settings expanded with 8 new settings. Notification events added: pending can block push, return-to-shop push, admin force-close (all 3 parties), cancelled-after-pickup in-app prompt. Deposit Wallet removed from Phase 2 (covered by MVP deposit credit system); replaced with Deposit Transaction History (Phase 2). Deactivation: mid-delivery completes normally. |
 
 ---
 
