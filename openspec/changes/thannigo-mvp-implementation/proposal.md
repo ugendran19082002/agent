@@ -1,0 +1,49 @@
+## Why
+
+ThanniGo PRD v2.1 defines the complete platform specification for all four roles (Customer, Shop Owner, Delivery Person, Admin) across authentication, ordering, delivery, water can deposits, payments, loyalty, referrals, and complaints. The existing codebase implements fragments of this surface area through a series of incremental changes, but has no unified PRD-aligned feature set covering the full role experience, tiered refund logic, COD control systems, or the revised water can pending model. This change brings the entire system into full PRD compliance.
+
+## What Changes
+
+- **Authentication**: Complete Phone + PIN auth flow with OTP via Brevo email (MSG91 fallback), PIN lockout after 3 wrong attempts, force-update gate on app launch, JWT access + refresh tokens, role-based routing post-login
+- **User Onboarding**: Customer self-registration (name + PIN), 4-step shop owner onboarding (basic details → documents → payment → live location), delivery person creation by shop owner with first-login PIN reset
+- **Admin Portal**: Admin dashboard with 9 stat cards, step-wise shop approval workflow, expanded system settings (17 configurable values), platform coupon management, complaint resolution
+- **Shop Owner Portal**: Full dashboard — product/category management with rule configuration panel, order accept/reject flow, auto-reject timeout, delivery staff management, shop open/close toggle, customer block/unblock, shop analytics
+- **Customer App**: Home screen with shop listing + GPS, shop detail with one-shop cart rule, checkout with full price breakdown, order tracking via Mapbox, order history with smart reorder, post-delivery feedback, loyalty screen, referral code, profile settings
+- **Delivery App**: Delivery dashboard, full lifecycle states, mandatory live proof photo at delivery, at-delivery can collection toggle, no-response protocol (2 calls + 10-min timer → auto-close), extra charge approval flow
+- **Water Can Pending System** (**BREAKING**): Replaces the existing single `user_can_balance` model. New model: `total_cans_given`, `total_cans_returned`, `pending_cans` tracked independently per can size (20L and 10L); `customer_deposit_balance` for excess deposit credit. Warning at 2 pending cans (banner), block at 3 (checkout gated). Deposit refund applied as real-time discount; excess credited to `customer_deposit_balance` (no expiry). Platform-wide deposit rates (₹200/20L, ₹100/10L) set by Admin in System Settings.
+- **Order Cancellation & UPI Tiered Refund**: Before-pickup = always 100%. After-pickup follows 30-day rolling tier (1st: 100%, 2nd: 60%, 3rd: 10%, 4th+: 0%). Deposit always refunded 100% separately. Return-to-shop flow on cancel-after-pickup and failed delivery.
+- **COD Control Systems**: Two independent mechanisms — `cod_failed_count` (blocks at 3) and `cod_trust_score` (starts 5, max 10, blocks at 0, +1 per 5 successful deliveries).
+- **Switch Shop Flow**: Shop reject or auto-reject → customer presented Switch Shop or Refund. Switch auto-suggests nearest+cheapest alternative; price diff handling for higher (explicit approval) and lower (auto-refund for UPI, pay new amount for COD).
+- **Loyalty & Referral**: Points earning events (₹100 spent → 10pts, 1 can → 2pts, first order bonus → 50pts, feedback → 10pts, referral → 100pts to referrer / 50pts to referee), 4-tier badge system (Bronze/Silver/Gold/Platinum), 6-month expiry, 100pts = ₹10 capped at 20% of order. Unique referral codes, rewards on first completed order.
+- **Notification System**: All 20+ notification events mapped to push (FCM/APNs), Brevo email, or MSG91 SMS channels per PRD section 17.
+
+## Capabilities
+
+### New Capabilities
+
+- `auth-pin-flow`: Phone number check, PIN entry with lockout, OTP reset via Brevo (MSG91 fallback), Set New PIN screen, JWT session management, force-update gate, role-based routing post-login
+- `user-onboarding`: Customer self-registration, shop owner 4-step onboarding (basic details, verification documents via camera/upload, payment details, GPS live location via Mapbox), delivery person account creation by shop owner with first-login PIN detection
+- `admin-portal`: Admin dashboard stat cards, step-wise shop approval (tabbed per onboarding step, mandatory rejection remarks), system settings CRUD (17 platform-wide settings), complaint queue and resolution flow
+- `shop-owner-portal`: Shop open/close toggle, product and category management with rule configuration panel (quantity rules, delivery rules, floor charges, bulk discount, live preview), order accept/reject with timeout, delivery staff CRUD, shop analytics (order summary, revenue, top products)
+- `customer-experience`: Home screen (shop cards, GPS, active order banner, loyalty badge, offers section, pending can banner), shop detail page (product listing, one-shop cart rule), checkout screen (full price breakdown, address selector, floor preferences, coupon entry, loyalty toggle, COD/online selection), order tracking via Mapbox, order history with smart reorder, post-delivery feedback (+10pts), loyalty points screen, profile settings
+- `delivery-experience`: Delivery dashboard (active delivery, pending pickups, availability toggle), full lifecycle status transitions, mandatory live proof photo upload at delivery, at-delivery can collection toggle with per-size tracking, no-response protocol (2 logged calls → 10-min auto-close → return-to-shop flow), extra charge approval request (5-min customer response window)
+- `water-can-pending-system`: Per-can-size (20L / 10L) tracking with `total_cans_given`, `total_cans_returned`, `pending_cans`; warning banner at 2 pending cans; checkout block at 3 pending cans; deposit refund as real-time discount with excess credited to `customer_deposit_balance`; cancel-after-pickup deposit always 100% refunded; Admin-managed platform-wide deposit rates
+- `order-cancel-refund-flow`: Before-pickup 100% refund (tier ignored); after-pickup UPI tiered refund via 30-day rolling cancellation counter; deposit refunded 100% separately on cancel-after-pickup; return-to-shop status flow (delivery person → shop owner confirmation → 60-min Admin force-close)
+- `cod-control-system`: `cod_failed_count` abuse block (threshold: 3) and `cod_trust_score` trust system (start 5, max 10, block at 0, recovery: +1 per 5 successful deliveries); no-response events affect trust score only (from 2nd offence); cancel-after-pickup affects both counters
+- `switch-shop-flow`: On shop reject or auto-reject, present Switch Shop or Refund options; auto-suggest nearest + cheapest alternative; enforce explicit customer approval for higher-price switch; auto-refund UPI difference for lower-price switch; COD lower-price = customer pays new amount at delivery
+- `loyalty-and-referral`: Loyalty points earning events, 4-tier badge system (Bronze default / Silver at 10 orders / Gold at 25 / Platinum at 50+) with multipliers, 6-month point expiry, redemption capped at 20% of order value (100pts = ₹10); unique referral codes, two-sided reward on first completed order
+- `notification-system`: All 20+ PRD notification events mapped to correct channels: push (FCM/APNs) for all real-time events; Brevo email for OTP (primary), approvals, delivery confirmations, refunds, complaint resolution; MSG91 SMS for OTP fallback only; in-app prompts for extra charge approval and cancel-after-pickup return
+
+### Modified Capabilities
+
+- `can-deposit-pricing`: Deposit amounts now platform-wide (Admin-managed via System Settings), not stored on product. Product form shows deposit as read-only display field. Per-size rates (₹200/20L, ₹100/10L).
+- `user-can-balance`: Replaced by the new `water-can-pending-system` model. Schema: two rows per customer (one per can size) with `total_cans_given`, `total_cans_returned`, `pending_cans`, `customer_deposit_balance` instead of single `cans_given`/`cans_returned`.
+- `checkout-refactor`: Add pending can deposit auto-charge line, deposit credit auto-apply line (`customer_deposit_balance`), checkout block enforcement when `pending_cans >= 3`, pending can warning at `pending_cans == 2`.
+- `delivery-can-collection`: Mandatory live proof photo (camera only, no gallery) before order can be marked Delivered. Per-can-size collection toggle. Collection updates `total_cans_returned` for the specific can size.
+
+## Impact
+
+- **Database**: New tables or schema changes for: per-size can tracking (replaces `user_can_balance`), `customer_deposit_balance` field, `pending_cans` computed column, `delivery_status` enum extension (`return_to_shop`), order fields (`deposit_reason`, `deposit_refunded`, `return_confirmed_at`, `force_closed_by_admin`), user fields (`cancellation_count_30d`, `lifetime_cancellations`, `cod_failed_count`, `cod_trust_score`, `cod_blocked`, `successful_cod_deliveries`, `first_login`), system settings expansion (17 values)
+- **Backend API**: New routes across all domains; existing `CanService` rewritten for per-size model; `OrderService` gains cancellation tier logic, return-to-shop flow, switch-shop logic; `AuthService` gains PIN lockout, force-update check; new `NotificationService` centralising all channel dispatch
+- **Frontend**: New screens across all 4 roles; Mapbox SDK integration for GPS tracking and live location capture; Zustand store updates for can balance, COD status, loyalty, referral
+- **External Services**: Brevo for transactional email (OTP primary), MSG91 for SMS OTP fallback, Razorpay for online payments + refunds, Firebase FCM + APNs for push
