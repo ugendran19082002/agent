@@ -2,14 +2,14 @@
 
 These tasks address drift surfaced by the artifact refresh against the live codebase. Land them BEFORE Section 9 so downstream work is built on the corrected foundation.
 
-- [ ] 0.1 Migrate `OrderService.handleCancellation` (lines 759–773) and `OrderService.processNoResponseEvent` (lines 1456–1473) to read/write `users.cod_failed_count`, `users.cod_trust_score`, `users.cod_blocked`, `users.successful_cod_deliveries` instead of `customers.cod_cancel_count` / `cod_cancel_limit` / `cod_blocked`
-- [ ] 0.2 Migrate `RefundRulesService` to read `users.cod_failed_count` / `users.cod_trust_score`; remove all references to `customers.cod_cancel_*`
-- [ ] 0.3 Update `OrderService.placeOrder` checkout block check (line 181-183) to read `users.cod_blocked` instead of `customers.cod_blocked`
-- [ ] 0.4 Write a one-shot backfill script `backend/src/scripts/backfillCodFields.js` that copies non-zero `customers.cod_cancel_count` into `users.cod_failed_count`, and `customers.cod_blocked` into `users.cod_blocked` for any user where the user-side value is still default
-- [ ] 0.5 Run `rg "cod_cancel_count|cod_cancel_limit"` and confirm zero remaining hits in `backend/src/` (excluding model definitions and migration scripts)
-- [ ] 0.6 Re-mount every router in `backend/src/routes/index.routes.js` under `/api/v1/...` (currently `/api/...`); keep `/api/...` mounted as a deprecation shim that returns a `Deprecation: true` response header
-- [ ] 0.7 Update `frontend/lib/api.ts` (or the equivalent base URL constant) to use `/api/v1/` and grep-replace any hard-coded `/api/` fetches in the frontend
-- [ ] 0.8 Verify Phase 2 scaffolds (`payoutRouters`, `supportRouters`, `PayoutLog`, `ShopWallet`, `SupportTicket`, related controllers/services) remain present but inert — confirm no MVP screens import them
+- [x] 0.1 Migrate `OrderService.handleCancellation` (lines 759–773) and `OrderService.processNoResponseEvent` (lines 1456–1473) to read/write `users.cod_failed_count`, `users.cod_trust_score`, `users.cod_blocked`, `users.successful_cod_deliveries` instead of `customers.cod_cancel_count` / `cod_cancel_limit` / `cod_blocked`
+- [x] 0.2 Migrate `RefundRulesService` to read `users.cod_failed_count` / `users.cod_trust_score`; remove all references to `customers.cod_cancel_*`
+- [x] 0.3 Update `OrderService.placeOrder` checkout block check (line 181-183) to read `users.cod_blocked` instead of `customers.cod_blocked`
+- [x] 0.4 Write a one-shot backfill script `backend/src/scripts/backfillCodFields.js` that copies non-zero `customers.cod_cancel_count` into `users.cod_failed_count`, and `customers.cod_blocked` into `users.cod_blocked` for any user where the user-side value is still default
+- [x] 0.5 Run `rg "cod_cancel_count|cod_cancel_limit"` and confirm zero remaining hits in `backend/src/` (excluding model definitions and migration scripts)
+- [x] 0.6 Re-mount every router in `backend/src/routes/index.routes.js` under `/api/v1/...` (currently `/api/...`); keep `/api/...` mounted as a deprecation shim that returns a `Deprecation: true` response header
+- [x] 0.7 Update `frontend/lib/api.ts` (or the equivalent base URL constant) to use `/api/v1/` and grep-replace any hard-coded `/api/` fetches in the frontend
+- [x] 0.8 Verify Phase 2 scaffolds (`payoutRouters`, `supportRouters`, `PayoutLog`, `ShopWallet`, `SupportTicket`, related controllers/services) remain present but inert — confirm no MVP screens import them
 
 ## 1. Database — Breaking Migration: Water Can Model
 
@@ -73,40 +73,40 @@ These tasks address drift surfaced by the artifact refresh against the live code
 
 ## 9. Backend — Shop Owner Portal
 
-- [ ] 9.1 Implement shop open/close toggle: `PATCH /api/v1/shop-owner/shop/status` — updates shop open/closed state
-- [ ] 9.2 Implement shop settings configuration endpoints (post-approval): min order value, delivery radius and pricing, floor charges, instant delivery toggle per zone
-- [ ] 9.3 Implement category and subcategory CRUD with uniqueness validation (PROD0001, PROD0002, PROD0003 error codes)
-- [ ] 9.4 Implement product CRUD: `is_water` flag, `can_size` field, deposit amount as read-only display from System Settings; validate all product fields per spec
-- [ ] 9.5 Implement Product Rule Configuration Panel API: endpoint to save per-product rules (quantity, delivery, floor charges, bulk discount) with 4-level fallback hierarchy
-- [ ] 9.6 Implement order accept endpoint with delivery person auto-assignment (nearest available) and manual reassignment: `PUT /api/v1/shop-owner/orders/:id/accept`
-- [ ] 9.7 Implement order reject endpoint: `PUT /api/v1/shop-owner/orders/:id/reject` — triggers switch-shop/refund resolution flow for customer
-- [ ] 9.8 Implement auto-reject timeout job: BullMQ job scheduled at order placement; fires after `order_accept_timeout` system setting; logs ORD0001, triggers switch/refund resolution
-- [ ] 9.9 Implement shop owner analytics endpoints: order summary, revenue summary, order status breakdown, top 5 products — all with Today/This Week/This Month filters
-- [ ] 9.10 Implement delivery person management endpoints: deactivate, remove (retain history), reset PIN
-- [ ] 9.11 Implement shop customer block/unblock endpoints and enforcement in order placement validation (log CUST0003 on blocked customer order attempt)
-- [ ] 9.12 Implement shop coupon creation endpoint: `POST /api/v1/shop-owner/coupons` with `issuer_type = shop` and `shop_id`; supports targets All Customers / Selected Customers / Individual Customer; validates code uniqueness, future expiry, discount type/value
-- [ ] 9.13 Implement shop coupon assignment endpoint: `POST /api/v1/shop-owner/customers/:id/assign-coupon` to link an existing shop coupon to one customer; bulk variant for selected-customers assignment from the Customer List screen
+- [x] 9.1 Implement shop open/close toggle: `PATCH /api/v1/shop-owner/shop/status` — updates shop open/closed state
+- [x] 9.2 Implement shop settings configuration endpoints (post-approval): min order value, delivery radius and pricing, floor charges, instant delivery toggle per zone
+- [x] 9.3 Implement category and subcategory CRUD with uniqueness validation (PROD0001, PROD0002, PROD0003 error codes)
+- [x] 9.4 Implement product CRUD: `is_water` flag, `can_size` field, deposit amount as read-only display from System Settings; validate all product fields per spec
+- [x] 9.5 Implement Product Rule Configuration Panel API: endpoint to save per-product rules (quantity, delivery, floor charges, bulk discount) with 4-level fallback hierarchy
+- [x] 9.6 Implement order accept endpoint with delivery person auto-assignment (nearest available) and manual reassignment: `PUT /api/v1/shop-owner/orders/:id/accept`
+- [x] 9.7 Implement order reject endpoint: `PUT /api/v1/shop-owner/orders/:id/reject` — triggers switch-shop/refund resolution flow for customer
+- [x] 9.8 Implement auto-reject timeout job: BullMQ job scheduled at order placement; fires after `order_accept_timeout` system setting; logs ORD0001, triggers switch/refund resolution
+- [x] 9.9 Implement shop owner analytics endpoints: order summary, revenue summary, order status breakdown, top 5 products — all with Today/This Week/This Month filters
+- [x] 9.10 Implement delivery person management endpoints: deactivate, remove (retain history), reset PIN
+- [x] 9.11 Implement shop customer block/unblock endpoints and enforcement in order placement validation (log CUST0003 on blocked customer order attempt)
+- [x] 9.12 Implement shop coupon creation endpoint: `POST /api/v1/shop-owner/coupons` with `issuer_type = shop` and `shop_id`; supports targets All Customers / Selected Customers / Individual Customer; validates code uniqueness, future expiry, discount type/value
+- [x] 9.13 Implement shop coupon assignment endpoint: `POST /api/v1/shop-owner/customers/:id/assign-coupon` to link an existing shop coupon to one customer; bulk variant for selected-customers assignment from the Customer List screen
 
 ## 10. Backend — Order Lifecycle
 
-- [ ] 10.1 Implement order placement endpoint `POST /api/v1/orders` with: idempotency key validation (client-supplied UUID via `Idempotency-Key` header, 10-min reuse window, log PAY0004 on duplicate), `pending_cans` block check, `users.cod_blocked` check, min order value check, deposit logic, loyalty points redemption, coupon application, price breakdown calculation
-- [ ] 10.2 Implement order cancellation endpoint with before/after pickup logic: `PUT /api/v1/orders/:id/cancel` — before Picked = 100% refund no tier; after Picked = read live 30d count from `order_status_logs` for tier, increment counters, trigger deposit separate refund
-- [ ] 10.3 Implement UPI tiered refund calculation: read `cancellation_count_30d` from live 30d query; apply correct tier percentage (100%/60%/10%/0%); initiate Razorpay refund for order total portion; initiate separate full refund for deposit
-- [ ] 10.4 Implement cancel-after-pickup return-to-shop flow: set `return_to_shop` status, notify delivery person in-app, start 60-min shop confirmation timer
-- [ ] 10.5 Implement return confirmation endpoint: `PUT /api/v1/orders/:id/confirm-return` (shop owner); set `return_confirmed_at`, status → `closed`
-- [ ] 10.6 Implement Admin force-close endpoint for unconfirmed returns: `PUT /api/v1/admin/orders/:id/force-close`; set `force_closed_by_admin = true`; notify all 3 parties
-- [ ] 10.7 Implement nightly cron to refresh `cancellation_count_30d` from `order_status_logs` for all customers
-- [ ] 10.8 Implement Razorpay payment verification idempotency: same Razorpay order ID returns the same verification result without re-processing or double-charging (PRD §18.3)
-- [ ] 10.9 Implement complaint submission endpoint usable by all non-admin roles: `POST /api/v1/complaints` with category, description (min 20 chars), optional photo attachment; persists with `complainant_role`; triggers Admin notification (push + Brevo email); logs COMP0001
+- [x] 10.1 Implement order placement endpoint `POST /api/v1/orders` with: idempotency key validation (client-supplied UUID via `Idempotency-Key` header, 10-min reuse window, log PAY0004 on duplicate), `pending_cans` block check, `users.cod_blocked` check, min order value check, deposit logic, loyalty points redemption, coupon application, price breakdown calculation
+- [x] 10.2 Implement order cancellation endpoint with before/after pickup logic: `PUT /api/v1/orders/:id/cancel` — before Picked = 100% refund no tier; after Picked = read live 30d count from `order_status_logs` for tier, increment counters, trigger deposit separate refund
+- [x] 10.3 Implement UPI tiered refund calculation: read `cancellation_count_30d` from live 30d query; apply correct tier percentage (100%/60%/10%/0%); initiate Razorpay refund for order total portion; initiate separate full refund for deposit
+- [x] 10.4 Implement cancel-after-pickup return-to-shop flow: set `return_to_shop` status, notify delivery person in-app, start 60-min shop confirmation timer
+- [x] 10.5 Implement return confirmation endpoint: `PUT /api/v1/orders/:id/confirm-return` (shop owner); set `return_confirmed_at`, status → `closed`
+- [x] 10.6 Implement Admin force-close endpoint for unconfirmed returns: `PUT /api/v1/admin/orders/:id/force-close`; set `force_closed_by_admin = true`; notify all 3 parties
+- [x] 10.7 Implement nightly cron to refresh `cancellation_count_30d` from `order_status_logs` for all customers
+- [x] 10.8 Implement Razorpay payment verification idempotency: same Razorpay order ID returns the same verification result without re-processing or double-charging (PRD §18.3)
+- [x] 10.9 Implement complaint submission endpoint usable by all non-admin roles: `POST /api/v1/complaints` with category, description (min 20 chars), optional photo attachment; persists with `complainant_role`; triggers Admin notification (push + Brevo email); logs COMP0001
 
 ## 11. Backend — Delivery Lifecycle
 
-- [ ] 11.1 Implement delivery person status update endpoints: `PUT /api/v1/delivery/:id/picked`, `/out-for-delivery`, `/delivering`
-- [ ] 11.2 Implement `PUT /api/v1/delivery/:id/delivered` — requires `proof_image` upload to Hetzner; validates photo present; updates `total_cans_given` if water order; applies can return deposit refund if `empty_can_collected = true`
-- [ ] 11.3 Implement no-response protocol: call logging endpoint, automatic 10-min timer start after 2nd logged call, auto-close to `failed_delivery`, trigger return-to-shop flow
-- [ ] 11.4 Implement extra charge request: `POST /api/v1/delivery/:id/change-request` — sends in-app approval to customer with 5-min timeout; customer approve/decline endpoints; deliver at original amount if declined or timeout
-- [ ] 11.5 Implement COD control updates against `users.*` (NOT `customers.*`): on cancel-after-pickup increment `users.cod_failed_count`, decrement `users.cod_trust_score`; on failed delivery (customer fault) increment `users.cod_failed_count`; on 5 successful COD deliveries increment `users.cod_trust_score` and reset `users.successful_cod_deliveries`; set `users.cod_blocked = true` when either threshold reached. Read `cod_block_threshold` and `cod_trust_score_starting_value` / `cod_trust_score_max` from System Settings, not hardcoded.
-- [ ] 11.6 Implement Arriving Soon trigger: Socket.io proximity check (500m) during GPS update; emit `arriving_soon` event; push notification to customer
+- [x] 11.1 Implement delivery person status update endpoints: `PUT /api/v1/delivery/:id/picked`, `/out-for-delivery`, `/delivering`
+- [x] 11.2 Implement `PUT /api/v1/delivery/:id/delivered` — requires `proof_image` upload to Hetzner; validates photo present; updates `total_cans_given` if water order; applies can return deposit refund if `empty_can_collected = true`
+- [x] 11.3 Implement no-response protocol: call logging endpoint, automatic 10-min timer start after 2nd logged call, auto-close to `failed_delivery`, trigger return-to-shop flow
+- [x] 11.4 Implement extra charge request: `POST /api/v1/delivery/:id/change-request` — sends in-app approval to customer with 5-min timeout; customer approve/decline endpoints; deliver at original amount if declined or timeout
+- [x] 11.5 Implement COD control updates against `users.*` (NOT `customers.*`): on cancel-after-pickup increment `users.cod_failed_count`, decrement `users.cod_trust_score`; on failed delivery (customer fault) increment `users.cod_failed_count`; on 5 successful COD deliveries increment `users.cod_trust_score` and reset `users.successful_cod_deliveries`; set `users.cod_blocked = true` when either threshold reached. Read `cod_block_threshold` and `cod_trust_score_starting_value` / `cod_trust_score_max` from System Settings, not hardcoded.
+- [x] 11.6 Implement Arriving Soon trigger: Socket.io proximity check (500m) during GPS update; emit `arriving_soon` event; push notification to customer
 
 ## 12. Backend — Switch Shop Flow
 
