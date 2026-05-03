@@ -154,3 +154,30 @@ The customer profile screen SHALL allow updating name, saved addresses (max 5), 
 #### Scenario: Customer exceeds max saved addresses
 - **WHEN** a customer attempts to add a 6th saved address
 - **THEN** the system SHALL prevent the addition and prompt the customer to delete an existing address first
+
+### Requirement: Complaint submission by any role (customer, shop owner, delivery person)
+Any non-admin role SHALL be able to raise a complaint via a complaint form. The form requires a category, description (min 20 chars), and optionally a photo attachment. On submission, Admin SHALL be notified via push and Brevo email.
+
+#### Scenario: Customer raises a complaint
+- **WHEN** a customer taps "Raise Complaint", selects a category, enters a description of at least 20 characters, optionally attaches a photo, and submits
+- **THEN** the system SHALL log COMP0001, persist the complaint with status Open and `complainant_role = customer`, and send a push + Brevo email to Admin: "New complaint from [Customer Name]"
+
+#### Scenario: Shop owner raises a complaint
+- **WHEN** a shop owner taps "Raise Complaint" and submits a valid complaint form
+- **THEN** the system SHALL log COMP0001, persist the complaint with `complainant_role = shop_owner`, and notify Admin
+
+#### Scenario: Delivery person raises a complaint
+- **WHEN** a delivery person taps "Raise Complaint" and submits a valid complaint form
+- **THEN** the system SHALL log COMP0001, persist the complaint with `complainant_role = delivery_person`, and notify Admin
+
+#### Scenario: Complaint description below minimum length
+- **WHEN** a complainant submits a description shorter than 20 characters
+- **THEN** the system SHALL block submission and display a validation message: "Description must be at least 20 characters."
+
+#### Scenario: Admin notification fails
+- **WHEN** the system fails to send the Admin notification after a complaint is persisted
+- **THEN** the system SHALL log COMP0002 and retain the complaint as Open; the complainant submission SHALL NOT be reverted
+
+#### Scenario: Complainant notified on resolution
+- **WHEN** Admin resolves a complaint
+- **THEN** the complainant SHALL receive a push notification and a Brevo email: "Your complaint has been resolved. View details."

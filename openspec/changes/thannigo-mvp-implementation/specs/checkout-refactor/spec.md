@@ -47,3 +47,29 @@ The payment method selection on the checkout screen SHALL disable the COD option
 #### Scenario: COD option disabled for blocked customer
 - **WHEN** a customer with `cod_blocked = true` reaches payment method selection
 - **THEN** the COD option SHALL appear disabled with the label "COD unavailable" and a sub-message explaining the reason
+
+### Requirement: Order placement idempotency via client-generated UUID
+The order placement endpoint SHALL accept a client-generated UUID as an idempotency key with every request. Duplicate requests bearing the same key within a 10-minute window SHALL return the same order ID without creating a second order.
+
+#### Scenario: Place Order with new idempotency key
+- **WHEN** a client submits a Place Order request with a UUID idempotency key not seen in the last 10 minutes
+- **THEN** the system SHALL create the order, persist the idempotency key, and return the new order ID
+
+#### Scenario: Duplicate Place Order request within 10 minutes
+- **WHEN** a client submits a Place Order request with the same idempotency key as a prior request within 10 minutes
+- **THEN** the system SHALL log PAY0004, NOT create a second order, and return the same order ID as the prior successful response
+
+#### Scenario: Place Order without idempotency key
+- **WHEN** a client submits a Place Order request without an idempotency key header
+- **THEN** the system SHALL reject the request with a 400 status and a message instructing the client to include `Idempotency-Key`
+
+### Requirement: Razorpay payment verification idempotency
+The payment verification endpoint SHALL be idempotent. Repeated calls with the same Razorpay order ID SHALL return the same verification result without re-processing the payment.
+
+#### Scenario: First verification call
+- **WHEN** the client posts a Razorpay verification with a Razorpay order ID
+- **THEN** the system SHALL verify the signature, update the payment record, and return the verification result
+
+#### Scenario: Repeated verification call after network drop
+- **WHEN** the client posts a duplicate verification call for the same Razorpay order ID
+- **THEN** the system SHALL return the previously stored verification result without re-processing or double-charging the customer

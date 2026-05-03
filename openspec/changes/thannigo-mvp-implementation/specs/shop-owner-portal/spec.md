@@ -134,3 +134,22 @@ Shop owners SHALL view 4 analytics reports filtered by time period (Today / This
 #### Scenario: Shop owner views top selling products
 - **WHEN** a shop owner views the Top Selling Products report
 - **THEN** the system SHALL display the top 5 products by order count for This Week or This Month
+
+### Requirement: Shop coupon creation and customer assignment
+Shop owners SHALL create coupons scoped to their shop only. The shop SHALL absorb the discount (no platform reimbursement). Coupons MAY target all customers, selected customers from the shop's customer list, or an individual customer.
+
+#### Scenario: Shop owner creates a shop-wide coupon
+- **WHEN** a shop owner submits a coupon with a unique alphanumeric code (4–20 chars), discount type and value, future expiry, and customer target = "All Customers"
+- **THEN** the system SHALL persist the coupon with `issuer_type = shop` and the shop's `shop_id`; the coupon SHALL be visible only to customers placing orders at this shop
+
+#### Scenario: Shop owner assigns a coupon to selected customers
+- **WHEN** a shop owner selects one or more Regular customers from the Customer List and assigns a shop coupon
+- **THEN** the system SHALL create coupon-user links for each selected customer; only those customers SHALL see the coupon as available
+
+#### Scenario: Shop coupon settlement at checkout
+- **WHEN** a customer applies a valid shop coupon at checkout
+- **THEN** the customer SHALL pay the discounted amount and the shop SHALL receive the same discounted amount; the platform SHALL NOT reimburse the shop
+
+#### Scenario: Duplicate shop coupon code rejected
+- **WHEN** a shop owner submits a coupon code that already exists anywhere in the system
+- **THEN** the system SHALL log CPN0005 and reject the creation

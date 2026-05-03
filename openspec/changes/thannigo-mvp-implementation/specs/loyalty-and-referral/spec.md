@@ -39,7 +39,7 @@ Customers SHALL redeem loyalty points at checkout at a rate of 100 points = ₹1
 - **THEN** the system SHALL cap the redemption at 20% of the order value and log LOY0002
 
 ### Requirement: 6-month fixed loyalty points expiry
-Loyalty points expire 6 months from the date they were earned. Points are expired on a per-event basis (each earning event has its own expiry).
+Loyalty points SHALL expire 6 months from the date they were earned. Points SHALL be expired on a per-event basis (each earning event has its own expiry).
 
 #### Scenario: Points expire after 6 months
 - **WHEN** a loyalty point event reaches 6 months from its `earned_at` date

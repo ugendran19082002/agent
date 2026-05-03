@@ -27,7 +27,7 @@ The Switch Shop option SHALL auto-suggest the nearest available shop that carrie
 - **THEN** the system SHALL fall back to the Refund option and process a full refund for the original order
 
 ### Requirement: Price difference handling on shop switch
-If the alternative shop's total is higher than the original order, the customer must explicitly approve the difference. If lower, the refund or payment adjustment is automatic.
+If the alternative shop's total is higher than the original order, the customer MUST explicitly approve the difference before the switch proceeds. If lower, the refund (UPI) or payment adjustment (COD) SHALL be automatic.
 
 #### Scenario: Alternative shop price is higher — explicit approval required
 - **WHEN** the alternative shop's total for the same items is higher than the original order total
