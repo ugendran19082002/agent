@@ -36,10 +36,10 @@
 
 - [x] 5.1 Add `getItemLayout` (height 120 dp) and wrap `ShopCard` in `React.memo` on the Customer Home shop `FlatList`
 - [x] 5.2 Add `getItemLayout` (height 88 dp) and wrap the order history row component in `React.memo` on `app/customer/order-history.tsx` (or equivalent)
-- [x] 5.3 Add `getItemLayout` (height 72 dp) and wrap the pending-order row in `React.memo` on the Delivery Dashboard pending list
+- [x] 5.3 Add `getItemLayout` using `DELIVERY_TRIP_ROW_HEIGHT` (392 dp stride for `DeliveryTripCard` + list spacing) and wrap the pending-trip row in `React.memo` on the Delivery Dashboard pending list
 - [x] 5.4 Wrap the Admin Shop List row component in `React.memo` and add `getItemLayout` (height 64 dp)
 - [x] 5.5 Replace all `<Image>` imports from `react-native` with `<Image>` from `expo-image` in the following screens: Customer Home shop list, Shop Detail product list, Order History list, Delivery Dashboard, and Admin Shop List; set `contentFit="cover"` on card images
-- [ ] 5.6 Implement `onEndReached` load-more pagination on Customer Home shop list, Order History, and Admin Shop List screens to consume the paginated API responses from task 4.5; append new pages to Zustand list state; stop fetching when `data.length >= total`
+- [x] 5.6 Implement `onEndReached` load-more pagination on Customer Home shop list, Order History, and Admin Shop List screens to consume the paginated API responses from task 4.5; append new pages to Zustand list state; stop fetching when `data.length >= total`
 
 ## 6. Checkout Service Boundary Update
 

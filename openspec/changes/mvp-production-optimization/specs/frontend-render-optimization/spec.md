@@ -1,11 +1,15 @@
 ## ADDED Requirements
 
 ### Requirement: FlatList Performance Tuning on High-Traffic Screens
-The five highest-frequency list screens SHALL have `getItemLayout` defined on their `FlatList` components where item height is fixed, and SHALL have `React.memo` applied to their list-item sub-components. The affected screens and their fixed item heights are: Customer Home shop list (120 dp card), Order History row (88 dp), Delivery Dashboard pending list (72 dp), Admin Shop List row (64 dp), and Delivery History row (72 dp).
+The five highest-frequency list screens SHALL have `getItemLayout` defined on their `FlatList` components where item height is fixed, and SHALL have `React.memo` applied to their list-item sub-components. The affected screens and their fixed item heights are: Customer Home shop list (120 dp card), Order History row (88 dp), Delivery Dashboard pending list (`DELIVERY_TRIP_ROW_HEIGHT`, 392 dp stride for memoized `DeliveryTripCard`), Admin Shop List row (64 dp), and Delivery History row (72 dp).
 
 #### Scenario: FlatList renders with getItemLayout
 - **WHEN** the Customer Home screen renders a list of nearby shops
 - **THEN** the `FlatList` component has a `getItemLayout` prop that returns `{ length: 120, offset: 120 * index, index }` for each item
+
+#### Scenario: Delivery Dashboard pending trips use getItemLayout
+- **WHEN** the Delivery Dashboard renders the online pending trips `FlatList`
+- **THEN** `getItemLayout` specifies `length: DELIVERY_TRIP_ROW_HEIGHT` (392), matching the memoized `DeliveryTripCard` row stride in `frontend/components/delivery/DeliveryTripCard.tsx`
 
 #### Scenario: List item component is memoized
 - **WHEN** the parent screen's state updates for a reason unrelated to the list data (e.g., a search bar input)
