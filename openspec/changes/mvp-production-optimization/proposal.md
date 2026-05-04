@@ -1,6 +1,6 @@
 ## Why
 
-The Thannigo MVP is functionally complete but carries structural debt that will cause progressive degradation under real user load: a 2,286-line `OrderService` monolith, no systematic Redis caching (every hot read hits MySQL), inconsistent pagination across list endpoints, and no structured logging to diagnose production issues. Addressing these now — before the first production release — avoids costly rewrites after data volumes grow and users are live.
+The Thannigo MVP is functionally complete but carries structural debt that will cause progressive degradation under real user load: a 2,286-line `OrderService` monolith, no systematic Redis caching (every hot read hits MySQL), inconsistent pagination across list endpoints, no structured logging to diagnose production issues, and zero automated test coverage. Addressing these now — before the first production release — avoids costly rewrites after data volumes grow, users are live, and regressions become undetectable.
 
 ## What Changes
 
@@ -10,6 +10,7 @@ The Thannigo MVP is functionally complete but carries structural debt that will 
 - **Add structured logging and request correlation** so every inbound request carries a `X-Request-ID` that flows through service calls, queue jobs, and error logs.
 - **Optimize frontend rendering** by auditing and applying `React.memo`, `useMemo`, `useCallback`, and `FlatList` `keyExtractor`/`getItemLayout` across high-frequency screens.
 - **Add health-check and readiness endpoints** (`GET /health`, `GET /ready`) for Nginx and process managers.
+- **Introduce standardized testing layers** across backend and frontend with Jest, Supertest, `@testing-library/react-native`, and Detox covering unit → integration → E2E for all critical flows.
 
 ## Capabilities
 
@@ -20,6 +21,7 @@ The Thannigo MVP is functionally complete but carries structural debt that will 
 - `observability-and-logging`: Defines structured log format (JSON), request correlation ID middleware, log levels per environment, health/readiness endpoint contracts, and error-tracking integration points.
 - `pagination-standardization`: Defines the unified pagination envelope (offset + limit + total or cursor-based), required query params, and the migration path for existing list endpoints.
 - `frontend-render-optimization`: Defines which screens require memoization, FlatList tuning rules, lazy-loaded route chunks, and image caching patterns.
+- `testing-infrastructure`: Defines the three-layer test pyramid for both backend (Jest unit → Supertest integration → E2E critical flows) and frontend (Jest unit → `@testing-library/react-native` component/screen integration → Detox E2E real user journeys), the tooling configuration, coverage thresholds, and which flows are mandatory to cover before release.
 
 ### Modified Capabilities
 
@@ -30,4 +32,5 @@ The Thannigo MVP is functionally complete but carries structural debt that will 
 - **Backend**: `backend/src/services/order/OrderService.js` split into 4 focused files; `backend/src/config/redis.js` gains a cache helper module; new middleware file for correlation IDs; all list controllers updated for pagination envelope.
 - **Frontend**: High-traffic screens (`Customer Home`, `Order Tracking`, `Order History`, `Delivery Dashboard`) audited and patched for render performance; bundle entry split reviewed.
 - **Infrastructure**: Two new Express routes (`/health`, `/ready`) used by Nginx upstream checks and PM2 health probes.
+- **Testing**: New `backend/src/tests/` structure for unit and integration suites; `frontend/__tests__/` for component and screen tests; `e2e/` at repo root for Detox flows. Jest config updated in both `backend/package.json` and `frontend/package.json`. CI pipeline can run `jest --coverage` on both packages.
 - **No breaking API changes**: All existing endpoint paths, auth, and response shapes are preserved.
