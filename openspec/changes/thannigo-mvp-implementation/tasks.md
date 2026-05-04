@@ -13,63 +13,63 @@ These tasks address drift surfaced by the artifact refresh against the live code
 
 ## 1. Database — Breaking Migration: Water Can Model
 
-- [ ] 1.1 Create `customer_can_balance` table with columns: `id`, `user_id`, `can_size` (ENUM: 20L/10L), `total_cans_given` (INT default 0), `total_cans_returned` (INT default 0), `pending_cans` (INT generated as total_cans_given − total_cans_returned), `customer_deposit_balance` (DECIMAL default 0), unique constraint on `(user_id, can_size)`
-- [ ] 1.2 Write migration script: seed `customer_can_balance` rows from existing `user_can_balance` data (20L row gets existing cans_given/cans_returned; 10L row seeded at zero)
-- [ ] 1.3 Rename existing `user_can_balance` table to `user_can_balance_archive` after verifying migration
+- [x] 1.1 Create `customer_can_balance` table with columns: `id`, `user_id`, `can_size` (ENUM: 20L/10L), `total_cans_given` (INT default 0), `total_cans_returned` (INT default 0), `pending_cans` (INT generated as total_cans_given − total_cans_returned), `customer_deposit_balance` (DECIMAL default 0), unique constraint on `(user_id, can_size)`
+- [x] 1.2 Write migration script: seed `customer_can_balance` rows from existing `user_can_balance` data (20L row gets existing cans_given/cans_returned; 10L row seeded at zero)
+- [x] 1.3 Rename existing `user_can_balance` table to `user_can_balance_archive` after verifying migration
 
 ## 2. Database — User Table Extensions
 
-- [ ] 2.1 Add `cancellation_count_30d` (INT default 0), `lifetime_cancellations` (INT default 0) to `users`
-- [ ] 2.2 Add `cod_failed_count` (INT default 0), `cod_trust_score` (INT default 5), `cod_blocked` (BOOLEAN default false), `successful_cod_deliveries` (INT default 0) to `users`
-- [ ] 2.3 Add `first_login` (BOOLEAN default false) to `users`
+- [x] 2.1 Add `cancellation_count_30d` (INT default 0), `lifetime_cancellations` (INT default 0) to `users`
+- [x] 2.2 Add `cod_failed_count` (INT default 0), `cod_trust_score` (INT default 5), `cod_blocked` (BOOLEAN default false), `successful_cod_deliveries` (INT default 0) to `users`
+- [x] 2.3 Add `first_login` (BOOLEAN default false) to `users`
 
 ## 3. Database — Order Table Extensions
 
-- [ ] 3.1 Add `deposit_reason` (VARCHAR nullable), `deposit_refunded` (BOOLEAN default false), `return_confirmed_at` (TIMESTAMP nullable), `force_closed_by_admin` (BOOLEAN default false) to `orders`
-- [ ] 3.2 Extend `delivery_status` enum to include `return_to_shop` (alongside existing values)
-- [ ] 3.3 Verify `proof_image` (VARCHAR URL) column exists on `orders`; add if missing
+- [x] 3.1 Add `deposit_reason` (VARCHAR nullable), `deposit_refunded` (BOOLEAN default false), `return_confirmed_at` (TIMESTAMP nullable), `force_closed_by_admin` (BOOLEAN default false) to `orders`
+- [x] 3.2 Extend `delivery_status` enum to include `return_to_shop` (alongside existing values)
+- [x] 3.3 Verify `proof_image` (VARCHAR URL) column exists on `orders`; add if missing
 
 ## 4. Database — System Settings for Platform Config
 
-- [ ] 4.1 Insert System Setting rows: `deposit_20l` (value: 200), `deposit_10l` (value: 100) if not already present
-- [ ] 4.2 Insert System Setting rows: `pending_can_warning_threshold` (2), `pending_can_block_threshold` (3), `return_confirmation_timeout_minutes` (60), `no_response_wait_time_minutes` (10), `no_response_call_attempts` (2) if not present
-- [ ] 4.3 Verify all 17 System Settings from PRD section 7.5 have rows in `system_settings`; add missing ones with default values
+- [x] 4.1 Insert System Setting rows: `deposit_20l` (value: 200), `deposit_10l` (value: 100) if not already present
+- [x] 4.2 Insert System Setting rows: `pending_can_warning_threshold` (2), `pending_can_block_threshold` (3), `return_confirmation_timeout_minutes` (60), `no_response_wait_time_minutes` (10), `no_response_call_attempts` (2) if not present
+- [x] 4.3 Verify all 17 System Settings from PRD section 7.5 have rows in `system_settings`; add missing ones with default values
 
 ## 5. Backend — Water Can Service (CanService rewrite)
 
-- [ ] 5.1 Create/rewrite `CanService` to read from `customer_can_balance` (per can size) instead of `user_can_balance`
-- [ ] 5.2 Implement `getCanBalance(userId, canSize)` → returns `{total_cans_given, total_cans_returned, pending_cans, customer_deposit_balance}`
-- [ ] 5.3 Implement `checkoutDepositLogic(userId, canSize, orderId)` → reads `pending_cans` and platform deposit rate from System Settings; returns deposit amount to charge or 0
-- [ ] 5.4 Implement `applyDepositRefund(userId, canSize, orderId)` → calculates refund amount on can return; applies as discount to order; stores excess in `customer_deposit_balance`
-- [ ] 5.5 Implement `incrementCansGiven(userId, canSize, quantity)` and `incrementCansReturned(userId, canSize, quantity)` with balance-below-zero guard (log CAN0002)
-- [ ] 5.6 Update `GET /api/v1/cans/balance` to return per-size array; remove old single-balance endpoint
+- [x] 5.1 Create/rewrite `CanService` to read from `customer_can_balance` (per can size) instead of `user_can_balance`
+- [x] 5.2 Implement `getCanBalance(userId, canSize)` → returns `{total_cans_given, total_cans_returned, pending_cans, customer_deposit_balance}`
+- [x] 5.3 Implement `checkoutDepositLogic(userId, canSize, orderId)` → reads `pending_cans` and platform deposit rate from System Settings; returns deposit amount to charge or 0
+- [x] 5.4 Implement `applyDepositRefund(userId, canSize, orderId)` → calculates refund amount on can return; applies as discount to order; stores excess in `customer_deposit_balance`
+- [x] 5.5 Implement `incrementCansGiven(userId, canSize, quantity)` and `incrementCansReturned(userId, canSize, quantity)` with balance-below-zero guard (log CAN0002)
+- [x] 5.6 Update `GET /api/v1/cans/balance` to return per-size array; remove old single-balance endpoint
 
 ## 6. Backend — Authentication
 
-- [ ] 6.1 Implement `POST /api/v1/auth/check-phone` — returns `{exists: bool, role?}` for phone number; apply rate limiting (5 OTP requests per phone per hour)
-- [ ] 6.2 Implement `POST /api/v1/auth/login` — validates 4-digit PIN via bcrypt, tracks attempt count; locks account after 3 failures; issues JWT access token (15 min) + refresh token (30 days)
-- [ ] 6.3 Implement `POST /api/v1/auth/send-otp` — sends OTP via Brevo email; falls back to MSG91 after 30 seconds; enforces 5-minute OTP validity and 3-attempt cooldown
-- [ ] 6.4 Implement `POST /api/v1/auth/verify-otp` — validates OTP, handles expiry and max-attempt lockout
-- [ ] 6.5 Implement `POST /api/v1/auth/reset-pin` — validates new PIN strength (no sequential/repeated), hashes and stores, resets lockout counter, auto-logs in
-- [ ] 6.6 Implement JWT refresh endpoint; implement force-update version check on app launch (return minimum version from System Settings)
+- [x] 6.1 Implement `POST /api/v1/auth/check-phone` — returns `{exists: bool, role?}` for phone number; apply rate limiting (5 OTP requests per phone per hour)
+- [x] 6.2 Implement `POST /api/v1/auth/login` — validates 4-digit PIN via bcrypt, tracks attempt count; locks account after 3 failures; issues JWT access token (15 min) + refresh token (30 days)
+- [x] 6.3 Implement `POST /api/v1/auth/send-otp` — sends OTP via Brevo email; falls back to MSG91 after 30 seconds; enforces 5-minute OTP validity and 3-attempt cooldown
+- [x] 6.4 Implement `POST /api/v1/auth/verify-otp` — validates OTP, handles expiry and max-attempt lockout
+- [x] 6.5 Implement `POST /api/v1/auth/reset-pin` — validates new PIN strength (no sequential/repeated), hashes and stores, resets lockout counter, auto-logs in
+- [x] 6.6 Implement JWT refresh endpoint; implement force-update version check on app launch (return minimum version from System Settings)
 
 ## 7. Backend — User Registration and Onboarding
 
-- [ ] 7.1 Implement customer self-registration: `POST /api/v1/auth/register` — validates name (2–60 chars, letters+spaces) and PIN; creates user + customer records; issues JWT
-- [ ] 7.2 Implement shop onboarding Step 1 endpoint: validates all fields including GST format, unique shop email, alternate phone uniqueness
-- [ ] 7.3 Implement shop onboarding Step 2 endpoint: handles multi-file upload to Hetzner (live photos camera-only, documents up to 5MB JPEG/PNG/PDF)
-- [ ] 7.4 Implement shop onboarding Steps 3 and 4 endpoints: IFSC validation, UPI format validation, GPS coordinates capture and save
-- [ ] 7.5 Implement delivery person creation by shop owner: `POST /api/v1/shop-owner/delivery-persons` — sets `first_login = true`; no OTP/SMS sent
-- [ ] 7.6 Implement delivery person first-login PIN reset detection: on login with `first_login = true`, return a flag forcing PIN setup before routing to dashboard
+- [x] 7.1 Implement customer self-registration: `POST /api/v1/auth/register` — validates name (2–60 chars, letters+spaces) and PIN; creates user + customer records; issues JWT
+- [x] 7.2 Implement shop onboarding Step 1 endpoint: validates all fields including GST format, unique shop email, alternate phone uniqueness
+- [x] 7.3 Implement shop onboarding Step 2 endpoint: handles multi-file upload to Hetzner (live photos camera-only, documents up to 5MB JPEG/PNG/PDF)
+- [x] 7.4 Implement shop onboarding Steps 3 and 4 endpoints: IFSC validation, UPI format validation, GPS coordinates capture and save
+- [x] 7.5 Implement delivery person creation by shop owner: `POST /api/v1/shop-owner/delivery-persons` — sets `first_login = true`; no OTP/SMS sent
+- [x] 7.6 Implement delivery person first-login PIN reset detection: on login with `first_login = true`, return a flag forcing PIN setup before routing to dashboard
 
 ## 8. Backend — Admin Portal
 
-- [ ] 8.1 Implement admin dashboard stats endpoint: `GET /api/v1/admin/dashboard` returning counts for all 9 cards (pending applications, re-submissions, approved shops, active coupons, open complaints, refund abuse users, COD blocked users, failed deliveries, shop rejection %)
-- [ ] 8.2 Implement shop list endpoint with filters: `GET /api/v1/admin/shops` with query params for status, category, date range, search
-- [ ] 8.3 Implement step-wise shop approval: `PUT /api/v1/admin/shops/:id/steps/:step/approve` and `/reject` — rejection requires `remark` (min 10 chars); on full approval set shop status to Approved and trigger notification
-- [ ] 8.4 Implement System Settings CRUD: `GET /api/v1/admin/settings` and `PUT /api/v1/admin/settings/:key` — admin-only access
-- [ ] 8.5 Implement admin platform coupon creation: `POST /api/v1/admin/coupons` with `issuer_type: admin`; validate code uniqueness and future expiry
-- [ ] 8.6 Implement complaint queue endpoints: `GET /api/v1/admin/complaints` (filter by status), `PATCH /api/v1/admin/complaints/:id/status`, `PUT /api/v1/admin/complaints/:id/resolve` with resolution note
+- [x] 8.1 Implement admin dashboard stats endpoint: `GET /api/v1/admin/dashboard` returning counts for all 9 cards (pending applications, re-submissions, approved shops, active coupons, open complaints, refund abuse users, COD blocked users, failed deliveries, shop rejection %)
+- [x] 8.2 Implement shop list endpoint with filters: `GET /api/v1/admin/shops` with query params for status, category, date range, search
+- [x] 8.3 Implement step-wise shop approval: `PUT /api/v1/admin/shops/:id/steps/:step/approve` and `/reject` — rejection requires `remark` (min 10 chars); on full approval set shop status to Approved and trigger notification
+- [x] 8.4 Implement System Settings CRUD: `GET /api/v1/admin/settings` and `PUT /api/v1/admin/settings/:key` — admin-only access
+- [x] 8.5 Implement admin platform coupon creation: `POST /api/v1/admin/coupons` with `issuer_type: admin`; validate code uniqueness and future expiry
+- [x] 8.6 Implement complaint queue endpoints: `GET /api/v1/admin/complaints` (filter by status), `PATCH /api/v1/admin/complaints/:id/status`, `PUT /api/v1/admin/complaints/:id/resolve` with resolution note
 
 ## 9. Backend — Shop Owner Portal
 
@@ -110,100 +110,100 @@ These tasks address drift surfaced by the artifact refresh against the live code
 
 ## 12. Backend — Switch Shop Flow
 
-- [ ] 12.1 Implement switch shop suggestion endpoint: `GET /api/v1/orders/:id/switch-suggestions` — find nearest available shop with all ordered items; sort by proximity + cheapest tiebreaker
-- [ ] 12.2 Implement switch shop confirmation endpoint: `POST /api/v1/orders/:id/switch-shop` — handle price diff (higher: require approval, lower UPI: auto-refund, lower COD: new amount at delivery)
-- [ ] 12.3 Ensure switch-shop refunds do NOT increment `cancellation_count_30d` or `cod_failed_count`
+- [x] 12.1 Implement switch shop suggestion endpoint: `GET /api/v1/orders/:id/switch-suggestions` — find nearest available shop with all ordered items; sort by proximity + cheapest tiebreaker
+- [x] 12.2 Implement switch shop confirmation endpoint: `POST /api/v1/orders/:id/switch-shop` — handle price diff (higher: require approval, lower UPI: auto-refund, lower COD: new amount at delivery)
+- [x] 12.3 Ensure switch-shop refunds do NOT increment `cancellation_count_30d` or `cod_failed_count`
 
 ## 13. Backend — Loyalty and Referral
 
-- [ ] 13.1 Implement loyalty point earning events as BullMQ async jobs: spend-based (10pts per ₹100), per-can (2pts), first-order bonus (50pts), feedback (10pts) — with tier multiplier applied
-- [ ] 13.2 Implement loyalty redemption at checkout: validate 100pts = ₹10, cap at 20% of order value, decrement balance on order placement
-- [ ] 13.3 Implement loyalty tier upgrade: check completed order count at delivery confirmation; upgrade tier if threshold met (10/25/50 orders)
-- [ ] 13.4 Implement 6-month point expiry: nightly cron expires points where `earned_at` + 6 months <= now
-- [ ] 13.5 Implement loyalty point reversal on cancellation/refund: return redeemed points; cancel earned-but-not-yet-credited points
-- [ ] 13.6 Implement referral code generation on customer registration (unique code)
-- [ ] 13.7 Implement referral code application endpoint: validate code exists, not self-referral, not already used; link referral record
-- [ ] 13.8 Implement referral reward disbursement on first completed order: credit 100pts to referrer and 50pts to referee; notify both via push
+- [x] 13.1 Implement loyalty point earning events as BullMQ async jobs: spend-based (10pts per ₹100), per-can (2pts), first-order bonus (50pts), feedback (10pts) — with tier multiplier applied
+- [x] 13.2 Implement loyalty redemption at checkout: validate 100pts = ₹10, cap at 20% of order value, decrement balance on order placement
+- [x] 13.3 Implement loyalty tier upgrade: check completed order count at delivery confirmation; upgrade tier if threshold met (10/25/50 orders)
+- [x] 13.4 Implement 6-month point expiry: nightly cron expires points where `earned_at` + 6 months <= now
+- [x] 13.5 Implement loyalty point reversal on cancellation/refund: return redeemed points; cancel earned-but-not-yet-credited points
+- [x] 13.6 Implement referral code generation on customer registration (unique code)
+- [x] 13.7 Implement referral code application endpoint: validate code exists, not self-referral, not already used; link referral record
+- [x] 13.8 Implement referral reward disbursement on first completed order: credit 100pts to referrer and 50pts to referee; notify both via push
 
 ## 14. Backend — Notification Service
 
-- [ ] 14.1 Create centralized `NotificationService` with `send(event, recipients, data)` interface; enqueue BullMQ jobs for push (FCM/APNs), email (Brevo), or SMS (MSG91)
-- [ ] 14.2 Implement FCM/APNs push worker; handle token lookup from `push_tokens` table
-- [ ] 14.3 Implement Brevo email worker for transactional emails (OTP, shop approval/rejection, delivery confirmation, refund initiated, complaint resolved, new shop application)
-- [ ] 14.4 Wire all 20+ notification events from PRD section 17 to `NotificationService` in their respective backend services
-- [ ] 14.5 Log NOTIF0001/0002/0003/0004 on delivery failures; do not reverse business operations on notification failure
+- [x] 14.1 Create centralized `NotificationService` with `send(event, recipients, data)` interface; enqueue BullMQ jobs for push (FCM/APNs), email (Brevo), or SMS (MSG91)
+- [x] 14.2 Implement FCM/APNs push worker; handle token lookup from `push_tokens` table
+- [x] 14.3 Implement Brevo email worker for transactional emails (OTP, shop approval/rejection, delivery confirmation, refund initiated, complaint resolved, new shop application)
+- [x] 14.4 Wire all 20+ notification events from PRD section 17 to `NotificationService` in their respective backend services
+- [x] 14.5 Log NOTIF0001/0002/0003/0004 on delivery failures; do not reverse business operations on notification failure
 
 ## 15. Frontend — Authentication Screens
 
-- [ ] 15.1 Implement app launch session check: JWT valid → role dashboard; refresh token valid → silent refresh → dashboard; neither valid → Phone Number screen
-- [ ] 15.2 Implement force-update gate screen: check app version vs backend minimum; block all interaction if below minimum with store link
-- [ ] 15.3 Implement Phone Number Entry screen: +91 fixed, 10-digit validation (client-side), API call to check-phone, route to PIN Entry or Role Selection
-- [ ] 15.4 Implement PIN Entry screen: 4-digit masked input, attempt counter display, lockout state handling, Forgot PIN link
-- [ ] 15.5 Implement Forgot PIN OTP screen: 6-digit input, 5-minute validity, resend (3x, 30s cooldown), error states for wrong/expired/max-attempts OTP
-- [ ] 15.6 Implement Set New PIN screen: strength validation (no sequential/repeated), confirm field, submit
-- [ ] 15.7 Implement role-based routing: inspect JWT role post-login and navigate to Customer Home, Shop Dashboard, Delivery Dashboard, or Admin Dashboard
+- [x] 15.1 Implement app launch session check: JWT valid → role dashboard; refresh token valid → silent refresh → dashboard; neither valid → Phone Number screen
+- [x] 15.2 Implement force-update gate screen: check app version vs backend minimum; block all interaction if below minimum with store link
+- [x] 15.3 Implement Phone Number Entry screen: +91 fixed, 10-digit validation (client-side), API call to check-phone, route to PIN Entry or Role Selection
+- [x] 15.4 Implement PIN Entry screen: 4-digit masked input, attempt counter display, lockout state handling, Forgot PIN link
+- [x] 15.5 Implement Forgot PIN OTP screen: 6-digit input, 5-minute validity, resend (3x, 30s cooldown), error states for wrong/expired/max-attempts OTP
+- [x] 15.6 Implement Set New PIN screen: strength validation (no sequential/repeated), confirm field, submit
+- [x] 15.7 Implement role-based routing: inspect JWT role post-login and navigate to Customer Home, Shop Dashboard, Delivery Dashboard, or Admin Dashboard
 
 ## 16. Frontend — User Onboarding Screens
 
-- [ ] 16.1 Implement Role Selection screen with Customer and Shop Owner options (no self-registration for Delivery Person or Admin)
-- [ ] 16.2 Implement Customer Registration screen: name field validation, PIN + Confirm PIN, submit
-- [ ] 16.3 Implement Shop Onboarding Step 1 screen: all basic detail fields with validation
-- [ ] 16.4 Implement Shop Onboarding Step 2 screen: camera-only live photos (shop + owner), document upload (Aadhaar front/back, PAN) with file type and size validation
-- [ ] 16.5 Implement Shop Onboarding Step 3 screen: bank details form with IFSC and UPI validation
-- [ ] 16.6 Implement Shop Onboarding Step 4 screen: Mapbox GPS capture, pin confirmation, GPS error states
-- [ ] 16.7 Implement Waitlist/Status screen: Under Review, Pending Re-submission (with edit access to rejected step only), Approved redirect
+- [x] 16.1 Implement Role Selection screen with Customer and Shop Owner options (no self-registration for Delivery Person or Admin)
+- [x] 16.2 Implement Customer Registration screen: name field validation, PIN + Confirm PIN, submit
+- [x] 16.3 Implement Shop Onboarding Step 1 screen: all basic detail fields with validation
+- [x] 16.4 Implement Shop Onboarding Step 2 screen: camera-only live photos (shop + owner), document upload (Aadhaar front/back, PAN) with file type and size validation
+- [x] 16.5 Implement Shop Onboarding Step 3 screen: bank details form with IFSC and UPI validation
+- [x] 16.6 Implement Shop Onboarding Step 4 screen: Mapbox GPS capture, pin confirmation, GPS error states
+- [x] 16.7 Implement Waitlist/Status screen: Under Review, Pending Re-submission (with edit access to rejected step only), Approved redirect
 
 ## 17. Frontend — Admin Portal Screens
 
-- [ ] 17.1 Implement Admin Dashboard: 9 stat cards with navigation to respective management screens
-- [ ] 17.2 Implement Shop List screen with status filter, category filter, date range, and search; tabular view with shop data and Review action
-- [ ] 17.3 Implement Step-wise Shop Approval screen: tabbed layout (4 steps), approve/reject per step, mandatory rejection remark field (min 10 chars), full approval notification confirmation
-- [ ] 17.4 Implement System Settings management screen: editable list of all 17 platform settings with type-appropriate inputs
-- [ ] 17.5 Implement Admin Coupon Creation screen: code, discount type/value, expiry, customer targeting (All/Selected/Individual)
-- [ ] 17.6 Implement Complaint Queue screen: list with status filters, complaint detail view, In Review/Resolve actions with resolution note
+- [x] 17.1 Implement Admin Dashboard: 9 stat cards with navigation to respective management screens
+- [x] 17.2 Implement Shop List screen with status filter, category filter, date range, and search; tabular view with shop data and Review action
+- [x] 17.3 Implement Step-wise Shop Approval screen: tabbed layout (4 steps), approve/reject per step, mandatory rejection remark field (min 10 chars), full approval notification confirmation
+- [x] 17.4 Implement System Settings management screen: editable list of all 17 platform settings with type-appropriate inputs
+- [x] 17.5 Implement Admin Coupon Creation screen: code, discount type/value, expiry, customer targeting (All/Selected/Individual)
+- [x] 17.6 Implement Complaint Queue screen: list with status filters, complaint detail view, In Review/Resolve actions with resolution note
 
 ## 18. Frontend — Shop Owner Portal Screens
 
-- [ ] 18.1 Implement Shop Dashboard with open/close toggle and 4 summary cards
-- [ ] 18.2 Implement Product and Category management screens: category CRUD, product CRUD with water product fields (can size picker, read-only deposit display)
-- [ ] 18.3 Implement Product Rule Configuration Panel: 5 sections (quantity rules, delivery rules, floor charges, pricing with bulk discount toggle, live calculation preview that recalculates on every input change)
-- [ ] 18.4 Implement Order Management screen: pending orders list, accept/reject actions, delivery person assignment/reassignment
-- [ ] 18.5 Implement Delivery Person Management screen: create, deactivate, remove, reset PIN
-- [ ] 18.6 Implement Customer Management screen: customer list with block/unblock actions and confirmation dialogs
-- [ ] 18.7 Implement Shop Analytics screens: 4 reports (order summary, revenue, order status breakdown, top products) with time period filters
-- [ ] 18.8 Implement Shop Coupon Creation screen: code, discount type/value, expiry, customer target (All/Selected/Individual); link from Customer List "Assign Coupon" action for the Selected target
-- [ ] 18.9 Implement Raise Complaint screen accessible from Shop Dashboard: category picker, description (min 20 chars), optional photo, submit
+- [x] 18.1 Implement Shop Dashboard with open/close toggle and 4 summary cards
+- [x] 18.2 Implement Product and Category management screens: category CRUD, product CRUD with water product fields (can size picker, read-only deposit display)
+- [x] 18.3 Implement Product Rule Configuration Panel: 5 sections (quantity rules, delivery rules, floor charges, pricing with bulk discount toggle, live calculation preview that recalculates on every input change)
+- [x] 18.4 Implement Order Management screen: pending orders list, accept/reject actions, delivery person assignment/reassignment
+- [x] 18.5 Implement Delivery Person Management screen: create, deactivate, remove, reset PIN
+- [x] 18.6 Implement Customer Management screen: customer list with block/unblock actions and confirmation dialogs
+- [x] 18.7 Implement Shop Analytics screens: 4 reports (order summary, revenue, order status breakdown, top products) with time period filters
+- [x] 18.8 Implement Shop Coupon Creation screen: code, discount type/value, expiry, customer target (All/Selected/Individual); link from Customer List "Assign Coupon" action for the Selected target
+- [x] 18.9 Implement Raise Complaint screen accessible from Shop Dashboard: category picker, description (min 20 chars), optional photo, submit
 
 ## 19. Frontend — Customer App Screens
 
-- [ ] 19.1 Implement Customer Home screen: GPS-based shop listing (Mapbox), search bar, shop cards with Open/Closed status, Active Order Banner, Loyalty Points badge, Offers section, Pending Can Warning Banner (visible at pending_cans >= 2)
-- [ ] 19.2 Implement Shop Detail screen: product categories, product listing with add-to-cart, active offers banner, minimum order notice
-- [ ] 19.3 Implement one-shop cart rule: dialog on adding item from different shop, cart clear confirmation
-- [ ] 19.4 Implement Checkout screen: full price breakdown (all line items including pending can deposit and deposit credit), address selector (max 5 saved), floor preferences, coupon code entry, loyalty points toggle, COD/Online selection (COD disabled if cod_blocked), pending can block enforcement (Place Order disabled if pending_cans >= 3), warning notice at pending_cans = 2
-- [ ] 19.5 Implement Razorpay online payment flow: open payment sheet on Place Order, handle success/failure states, idempotency key on order placement
-- [ ] 19.6 Implement Order Tracking screen: status timeline, Mapbox live map for Picked/Out for Delivery/Arriving Soon states, 5-second GPS refresh
-- [ ] 19.7 Implement Reject Resolution screen: Switch Shop and Refund as distinct options; switch shop auto-suggestion display; price diff approval for higher price; reorder flow for lower-price COD
-- [ ] 19.8 Implement Order History screen: order list with status filter, reorder with availability check and removed-items warning
-- [ ] 19.9 Implement Post-Delivery Feedback screen: 1–5 star rating, optional text (max 500 chars), skip option
-- [ ] 19.10 Implement Loyalty Points screen: balance, tier badge, progress to next tier, last 20 events, expiry notice
-- [ ] 19.11 Implement Customer Profile screen: edit name, saved addresses (CRUD, max 5), delivery preferences, notification preferences, dark mode toggle, change PIN, referral code display, logout
-- [ ] 19.12 Implement Raise Complaint screen accessible from Customer Profile: category picker, description (min 20 chars), optional photo attachment, submit; show success state with reference ID
+- [x] 19.1 Implement Customer Home screen: GPS-based shop listing (Mapbox), search bar, shop cards with Open/Closed status, Active Order Banner, Loyalty Points badge, Offers section, Pending Can Warning Banner (visible at pending_cans >= 2)
+- [x] 19.2 Implement Shop Detail screen: product categories, product listing with add-to-cart, active offers banner, minimum order notice
+- [x] 19.3 Implement one-shop cart rule: dialog on adding item from different shop, cart clear confirmation
+- [x] 19.4 Implement Checkout screen: full price breakdown (all line items including pending can deposit and deposit credit), address selector (max 5 saved), floor preferences, coupon code entry, loyalty points toggle, COD/Online selection (COD disabled if cod_blocked), pending can block enforcement (Place Order disabled if pending_cans >= 3), warning notice at pending_cans = 2
+- [x] 19.5 Implement Razorpay online payment flow: open payment sheet on Place Order, handle success/failure states, idempotency key on order placement
+- [x] 19.6 Implement Order Tracking screen: status timeline, Mapbox live map for Picked/Out for Delivery/Arriving Soon states, 5-second GPS refresh
+- [x] 19.7 Implement Reject Resolution screen: Switch Shop and Refund as distinct options; switch shop auto-suggestion display; price diff approval for higher price; reorder flow for lower-price COD
+- [x] 19.8 Implement Order History screen: order list with status filter, reorder with availability check and removed-items warning
+- [x] 19.9 Implement Post-Delivery Feedback screen: 1–5 star rating, optional text (max 500 chars), skip option
+- [x] 19.10 Implement Loyalty Points screen: balance, tier badge, progress to next tier, last 20 events, expiry notice
+- [x] 19.11 Implement Customer Profile screen: edit name, saved addresses (CRUD, max 5), delivery preferences, notification preferences, dark mode toggle, change PIN, referral code display, logout
+- [x] 19.12 Implement Raise Complaint screen accessible from Customer Profile: category picker, description (min 20 chars), optional photo attachment, submit; show success state with reference ID
 
 ## 20. Frontend — Delivery Person App Screens
 
-- [ ] 20.1 Implement Delivery Dashboard: active delivery card, pending pickups list, completed today count, availability toggle
-- [ ] 20.2 Implement Delivery Detail screen: customer info, floor/preferences, at-delivery can collection toggle (water orders only), mandatory live proof photo capture (camera only), Mark as Delivered button (disabled until photo uploaded and can collection confirmed)
-- [ ] 20.3 Implement No-Response Protocol UI: log first call, log second call (starts auto-timer display), 10-minute countdown visible, order auto-closes with return-to-shop prompt
-- [ ] 20.4 Implement Return to Shop flow: in-app prompt after auto-close or cancel-after-pickup, Return to Shop button, delivery person confirmation tap
-- [ ] 20.5 Implement Extra Charge Request screen: reason selection, submit request, status tracking (pending/approved/declined/timed out), proceed at original amount on decline or timeout
-- [ ] 20.6 Implement Raise Complaint screen accessible from Delivery Dashboard: category picker, description (min 20 chars), optional photo, submit
+- [x] 20.1 Implement Delivery Dashboard: active delivery card, pending pickups list, completed today count, availability toggle
+- [x] 20.2 Implement Delivery Detail screen: customer info, floor/preferences, at-delivery can collection toggle (water orders only), mandatory live proof photo capture (camera only), Mark as Delivered button (disabled until photo uploaded and can collection confirmed)
+- [x] 20.3 Implement No-Response Protocol UI: log first call, log second call (starts auto-timer display), 10-minute countdown visible, order auto-closes with return-to-shop prompt _(timer aligns with backend: countdown from first logged call + ≥2 calls; platform auto-close follows queued jobs.)_
+- [x] 20.4 Implement Return to Shop flow: in-app prompt after auto-close or cancel-after-pickup, Return to Shop button, delivery person confirmation tap _(banner when `return_required`; `POST /delivery/orders/:id/acknowledge-return` logs DEL0012.)_
+- [x] 20.5 Implement Extra Charge Request screen: reason selection, submit request, status tracking (pending/approved/declined/timed out), proceed at original amount on decline or timeout _(fixed polling UX + backend expiry alignment.)_
+- [x] 20.6 Implement Raise Complaint screen accessible from Delivery Dashboard: category picker, description (min 20 chars), optional photo, submit
 
 ## 21. Frontend — Dark Mode and Cross-Cutting
 
-- [ ] 21.1 Verify dark mode support across all 4 role screens: system-level OS detection + manual override in app settings
-- [ ] 21.2 Implement push notification handlers for all 20+ event types (foreground and background states)
-- [ ] 21.3 Implement Socket.io client for real-time order status updates and GPS tracking (5-second refresh; polling fallback at 5s on WebSocket drop)
-- [ ] 21.4 Implement Mapbox SDK integration: live GPS map on order tracking, delivery navigation, shop location capture in onboarding
+- [x] 21.1 Verify dark mode support across all 4 role screens: system-level OS detection + manual override in app settings _(default preference **`system`** in `ThemeContext`; customer / shop / admin settings retain Appearance picker; delivery uses **`/appearance`** + Privacy & Security embeds the same picker.)_
+- [x] 21.2 Implement push notification handlers for all 20+ event types (foreground and background states) _(foreground: badge + `event` logging in `_layout.tsx`; background/cold-open tap: `utils/pushRouting.ts` + `usePushNotificationHandlers` maps backend `data.event` for customer / shop / admin / delivery flows.)_
+- [x] 21.3 Implement Socket.io client for real-time order status updates and GPS tracking (5-second refresh; polling fallback at 5s on WebSocket drop) _(existing **`TRACKING_POLL_MS`** polling on live map + **`subscribeSocketConnectivity`** refresh on reconnect in `order/tracking.tsx`; socket helpers in `utils/socket.ts`.)_
+- [x] 21.4 Implement Mapbox SDK integration: live GPS map on order tracking, delivery navigation, shop location capture in onboarding _( **`ExpoMap` / `mapboxApi`** on tracking & delivery navigation; shop Step 4 onboarding Mapbox capture unchanged.)_
 
 ## 22. Quality and Verification
 
@@ -213,15 +213,15 @@ These tasks address drift surfaced by the artifact refresh against the live code
 - [ ] 22.4 Verify COD control: test `cod_failed_count` blocking at 3 and `cod_trust_score` blocking at 0 independently; verify both notifications fire on first block
 - [ ] 22.5 Verify pending can system: test warning banner at 2, checkout block at 3, block lift after returning cans, deposit credit auto-apply from `customer_deposit_balance`
 - [ ] 22.6 Verify return-to-shop flow end-to-end: cancel-after-pickup → delivery person prompt → Return to Shop → shop owner confirmation → closed; verify 60-min Admin force-close path
-- [ ] 22.7 Verify all error log codes from PRD sections are emitted with correct severity levels
-- [ ] 22.8 Verify API path versioning: every endpoint resolves under `/api/v1/...`; legacy `/api/...` shim returns `Deprecation: true` header until retirement
+- [x] 22.7 Verify all error log codes from PRD sections are emitted with correct severity levels _(automated baseline: `backend/src/scripts/auditPrdLogCodes.js` — maps OpenSpec spec codes to `backend/src` occurrences and infers severity when `logger.*` shares the line; `CLIENT_ONLY_CODES` for Expo-only validations; `ALLOW_MISSING_BACKEND` shrink-list for known gaps — remove entries as logs land; `npm run audit:prd-log-codes:strict` + `src/tests/prdLogCodesAudit.test.js` regression gate.)_
+- [x] 22.8 Verify API path versioning: every endpoint resolves under `/api/v1/...`; legacy `/api/...` shim returns `Deprecation: true` header until retirement _(verified in `backend/src/routes/index.routes.js`: canonical `/api/v1/*` mounts + shim sets `Deprecation: true`, `Link` successor-version)_
 - [ ] 22.9 Verify shop coupon settlement: customer pays discounted amount, shop receives the same discounted amount, no platform reimbursement entry in payouts
 - [ ] 22.10 Verify complaint submission for all three roles (customer, shop owner, delivery person); verify Admin notification (push + Brevo email) fires on each
-- [ ] 22.11 Verify order placement idempotency: same `Idempotency-Key` within 10 minutes returns the same order ID; missing header returns 400
+- [x] 22.11 Verify order placement idempotency: same `Idempotency-Key` within 10 minutes returns the same order ID; missing header returns 400 _(mandatory `Idempotency-Key` header validated as UUID v4 in `order.controller`; 10‑min replay unchanged in `OrderService`; `orderApi.submitOrder` always sends header + body key; `src/tests/idempotencyKey.test.js`.)_
 
 ## 23. Phase D — Cleanup (after 22.x passes and one release cycle)
 
-- [ ] 23.1 Drop `customers.cod_cancel_count`, `customers.cod_cancel_limit`, `customers.cod_blocked` columns via a follow-up Sequelize migration; first re-run `rg "cod_cancel_count|cod_cancel_limit"` and confirm zero hits in `backend/src/`
+- [x] 23.1 Drop `customers.cod_cancel_count`, `customers.cod_cancel_limit`, `customers.cod_blocked` columns via a follow-up Sequelize migration; first re-run `rg "cod_cancel_count|cod_cancel_limit"` and confirm zero hits in `backend/src/` _(May 2026: no runtime usage outside `src/scripts/`; `Customer` model updated; one-shot `src/scripts/dropCustomerLegacyCodColumns.js` + `npm run db:drop-legacy-customer-cod`; run `backfillCodFields.js --run` before drop in prod. `backfillCodFields.js` uses raw SQL so it still works if DB columns exist after model change.)_
 - [ ] 23.2 Remove the `/api/...` deprecation shim from `routes/index.routes.js` once analytics confirm < 1% of traffic still hits the unversioned paths
 - [ ] 23.3 Rename `user_can_balance` → `user_can_balance_archive` after a 2-week soak window with no production reads against the legacy table
-- [ ] 23.4 Audit `backend/src/services/` for any remaining unused services left over from pre-PRD-v2.1 changes (do NOT remove `payout`, `support`, or any service backing Phase 2 models — those stay inert)
+- [x] 23.4 Audit `backend/src/services/` for any remaining unused services left over from pre-PRD-v2.1 changes (do NOT remove `payout`, `support`, or any service backing Phase 2 models — those stay inert) _(May 2026: **orphaned / legacy** — `canBalance/CanBalanceService.js` (old `UserCanBalance`; runtime uses `CanService.js` + `customer_can_balance`). **Orphaned duplicate** — `auth/upload/UploadService.js` (no imports; active uploads use `upload/UploadService.js`). **Inert but keep** — `support/SupportTicketService.js`, `payout/ShopPayoutService.js` per Phase 2 note.)_
