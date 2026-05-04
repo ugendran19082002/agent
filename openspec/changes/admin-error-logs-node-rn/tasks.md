@@ -17,7 +17,7 @@
 
 ## 4. React Native — UI
 
-- [x] 4.1 Add `app/admin/error-logs.tsx` (list) with FlatList, badges, search, filter, pull-to-refresh, infinite scroll, empty/error/loading states
+- [x] 4.1 Add `app/admin/error-logs/index.tsx` (list) with FlatList, badges, search, filter, pull-to-refresh, infinite scroll, empty/error/loading states
 - [x] 4.2 Add `app/admin/error-logs/[id].tsx` (detail) with full fields + formatted JSON
 - [x] 4.3 Register screens in `app/admin/_layout.tsx`
 - [x] 4.4 Add More menu item in `app/admin/(tabs)/more.tsx`
