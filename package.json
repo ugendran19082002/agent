@@ -1,0 +1,8 @@
+{
+  "name": "thannigo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:e2e": "detox test --configuration ios.sim.debug --config-path e2e/.detoxrc.js"
+  }
+}
