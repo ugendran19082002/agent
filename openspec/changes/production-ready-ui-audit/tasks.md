@@ -1,31 +1,31 @@
 ## 1. Design Token Consolidation
 
-- [ ] 1.1 Audit `styles/colors.ts`, `styles/typography.ts`, `styles/spacing.ts` — list every token that differs from or duplicates `constants/theme.ts`
-- [ ] 1.2 Update `styles/index.ts` to re-export `Colors`, `Typography`, `Spacing`, `Radius`, `Shadow` from `constants/theme.ts` (backward-compat shim)
-- [ ] 1.3 Search all files in `app/` and `components/` for direct imports of `styles/colors.ts`, `styles/typography.ts`, `styles/spacing.ts` — migrate each to `constants/theme.ts` or `@/styles`
-- [ ] 1.4 Delete `styles/colors.ts`, `styles/typography.ts`, `styles/spacing.ts` after all imports are migrated and no remaining references exist
+- [x] 1.1 Audit `styles/colors.ts`, `styles/typography.ts`, `styles/spacing.ts` — list every token that differs from or duplicates `constants/theme.ts`
+- [x] 1.2 Update `styles/index.ts` to re-export `Colors`, `Typography`, `Spacing`, `Radius`, `Shadow` from `constants/theme.ts` (backward-compat shim)
+- [x] 1.3 Search all files in `app/` and `components/` for direct imports of `styles/colors.ts`, `styles/typography.ts`, `styles/spacing.ts` — migrate each to `constants/theme.ts` or `@/styles`
+- [x] 1.4 Delete `styles/colors.ts`, `styles/typography.ts`, `styles/spacing.ts` after all imports are migrated and no remaining references exist
 - [ ] 1.5 Grep `app/` and `components/` for bare hex strings (e.g. `'#[0-9a-fA-F]{3,6}'`) and replace each with the corresponding theme token
 - [ ] 1.6 Grep `app/` and `components/` for bare numeric padding/margin values (e.g. `padding: 16`) and replace with `Spacing.*` tokens
 
 ## 2. Responsive Utilities
 
-- [ ] 2.1 Create `hooks/use-responsive.ts` with `useResponsive()` returning `{ size: 'sm'|'md'|'lg', scale: number, isTablet: boolean }` based on `Dimensions.get('window').width`
-- [ ] 2.2 Add `Dimensions` change listener in `useResponsive` so it re-evaluates on orientation change
-- [ ] 2.3 Update `components/ui/ScreenContainer.tsx` to use `useResponsive` for horizontal padding (md on small, xl on tablet, center-constrained max-width on tablet)
-- [ ] 2.4 Search screens for `width: 375` or other hardcoded device-pixel widths and replace with `'100%'` or `flex: 1`
+- [x] 2.1 Create `hooks/use-responsive.ts` with `useResponsive()` returning `{ size: 'sm'|'md'|'lg', scale: number, isTablet: boolean }` based on `Dimensions.get('window').width`
+- [x] 2.2 Add `Dimensions` change listener in `useResponsive` so it re-evaluates on orientation change
+- [x] 2.3 Update `components/ui/ScreenContainer.tsx` to use `useResponsive` for horizontal padding (md on small, xl on tablet, center-constrained max-width on tablet)
+- [x] 2.4 Search screens for `width: 375` or other hardcoded device-pixel widths and replace with `'100%'` or `flex: 1`
 
 ## 3. UI Component Audit & Standardization
 
-- [ ] 3.1 Audit `components/ui/Button.tsx` — verify minimum 44dp touch height for `size="sm"`, check dark mode label contrast, add `hitSlop` if needed
-- [ ] 3.2 Audit `components/ui/Card.tsx` — verify it uses `Shadow` tokens, `Radius` tokens, and `Colors.surface`/`Colors.dark.surface` correctly
-- [ ] 3.3 Audit `components/ui/AppTextInput.tsx` — verify `Colors.inputBg`, `Colors.placeholder`, `Colors.border`, and error state using `Colors.error`
-- [ ] 3.4 Audit `components/ui/Badge.tsx` — verify semantic color variants (success/warning/error/info) all use theme tokens
-- [ ] 3.5 Audit `components/ui/EmptyState.tsx` — verify it accepts icon, title, subtitle, action button props; uses `Typography` and `Spacing` tokens
-- [ ] 3.6 Audit `components/ui/Skeleton.tsx` — verify animation uses `Colors.border` → `Colors.inputBg` interpolation; accepts width/height props
-- [ ] 3.7 Audit `components/ui/PageHeader.tsx` — verify it uses `Typography.h3`/`Typography.h4`, role gradient or neutral header, and `BackButton` with `hitSlop`
-- [ ] 3.8 Audit `components/ui/StatCard.tsx` — verify it uses `Typography.h2` for value, `Typography.caption` for label, theme surface/shadow
-- [ ] 3.9 Audit `components/ui/RoleHeader.tsx` — verify role gradient, role label, and accent come from `roleGradients`, `roleLabel`, `roleAccent` in `constants/theme.ts`
-- [ ] 3.10 Audit `components/ui/PromoBanner.tsx`, `Timeline.tsx`, `ProgressBar.tsx`, `NoInternetBanner.tsx` for token compliance
+- [x] 3.1 Audit `components/ui/Button.tsx` — verify minimum 44dp touch height for `size="sm"`, check dark mode label contrast, add `hitSlop` if needed
+- [x] 3.2 Audit `components/ui/Card.tsx` — verify it uses `Shadow` tokens, `Radius` tokens, and `Colors.surface`/`Colors.dark.surface` correctly
+- [x] 3.3 Audit `components/ui/AppTextInput.tsx` — verify `Colors.inputBg`, `Colors.placeholder`, `Colors.border`, and error state using `Colors.error`
+- [x] 3.4 Audit `components/ui/Badge.tsx` — verify semantic color variants (success/warning/error/info) all use theme tokens
+- [x] 3.5 Audit `components/ui/EmptyState.tsx` — verify it accepts icon, title, subtitle, action button props; uses `Typography` and `Spacing` tokens
+- [x] 3.6 Audit `components/ui/Skeleton.tsx` — verify animation uses `Colors.border` → `Colors.inputBg` interpolation; accepts width/height props
+- [x] 3.7 Audit `components/ui/PageHeader.tsx` — verify it uses `Typography.h3`/`Typography.h4`, role gradient or neutral header, and `BackButton` with `hitSlop`
+- [x] 3.8 Audit `components/ui/StatCard.tsx` — verify it uses `Typography.h2` for value, `Typography.caption` for label, theme surface/shadow
+- [x] 3.9 Audit `components/ui/RoleHeader.tsx` — verify role gradient, role label, and accent come from `roleGradients`, `roleLabel`, `roleAccent` in `constants/theme.ts`
+- [x] 3.10 Audit `components/ui/PromoBanner.tsx`, `Timeline.tsx`, `ProgressBar.tsx`, `NoInternetBanner.tsx` for token compliance
 
 ## 4. Auth Screen Refactor
 
