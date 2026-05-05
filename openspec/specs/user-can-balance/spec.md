@@ -1,41 +1,21 @@
-## ADDED Requirements
+## REMOVED Requirements
 
 ### Requirement: Per-user can balance ledger
-The system SHALL maintain a `user_can_balance` record for every user with fields `cans_given` (integer, default 0) and `cans_returned` (integer, default 0). The effective balance SHALL be computed as `cans_given - cans_returned`.
-
-#### Scenario: New user has zero balance
-- **WHEN** a new user account is created
-- **THEN** a `user_can_balance` record SHALL be created with `cans_given = 0` and `cans_returned = 0`
-
-#### Scenario: Balance computation
-- **WHEN** any part of the system queries a user's can balance
-- **THEN** balance SHALL equal `cans_given - cans_returned`
+**Reason**: The single `user_can_balance` model (one row per user with `cans_given` and `cans_returned`) is incompatible with PRD v2.1, which requires independent tracking per can size (20L and 10L). The new model is defined in `water-can-pending-system`.
+**Migration**: 
+1. Create the new `customer_can_balance` table with `(user_id, can_size)` as composite key and fields `total_cans_given`, `total_cans_returned`, `pending_cans`, `customer_deposit_balance`.
+2. Migrate existing `user_can_balance` rows: create two rows per user (one for 20L, one for 10L) where the 20L row gets the existing `cans_given`/`cans_returned` values and the 10L row starts at zero (since the old model was not size-aware).
+3. Rename old `user_can_balance` table to `user_can_balance_archive` after a 2-week soak period.
+4. Update all backend code that references `user_can_balance` to use `customer_can_balance`.
 
 ### Requirement: Cans given increments on delivery confirmation
-`cans_given` SHALL increment by the quantity of water product cans in an order when that order is marked as delivered.
-
-#### Scenario: Order delivered with water cans
-- **WHEN** an order containing 2 units of a water product is marked as delivered
-- **THEN** the customer's `cans_given` SHALL increase by 2
-
-#### Scenario: Order cancelled before delivery
-- **WHEN** an order is cancelled before being marked delivered
-- **THEN** `cans_given` SHALL NOT be incremented
+**Reason**: Superseded by the `water-can-pending-system` requirement "total_cans_given increments on delivery confirmation", which adds per-can-size granularity.
+**Migration**: Update delivery confirmation logic to increment `total_cans_given` on the `customer_can_balance` row matching the order's can size, not the old `user_can_balance` row.
 
 ### Requirement: Cans returned increments on collection confirmation
-`cans_returned` SHALL increment by the number of empty cans confirmed collected by the delivery person at the time of delivery.
-
-#### Scenario: Delivery person confirms empty can collected
-- **WHEN** a delivery person marks "Empty can collected" for an order
-- **THEN** `cans_returned` SHALL increment by the number of cans confirmed collected
-
-#### Scenario: Delivery person marks empty not collected
-- **WHEN** a delivery person marks "Empty not collected" for an order
-- **THEN** `cans_returned` SHALL NOT increment for that delivery
+**Reason**: Superseded by the `water-can-pending-system` requirement for `total_cans_returned` with per-size tracking.
+**Migration**: Update delivery can collection confirmation to increment `total_cans_returned` on the `customer_can_balance` row matching the order's can size.
 
 ### Requirement: Can balance exposed via API
-The system SHALL provide an API endpoint that returns the authenticated customer's current can balance.
-
-#### Scenario: Customer queries own balance
-- **WHEN** an authenticated customer calls `GET /api/user/can-balance`
-- **THEN** the response SHALL include `cans_given`, `cans_returned`, and `balance` fields
+**Reason**: The old endpoint `GET /api/user/can-balance` returned a single balance. The new API must return per-size balances.
+**Migration**: Replace `GET /api/user/can-balance` with `GET /api/v1/cans/balance` (per PRD route map) which returns an array of `{can_size, total_cans_given, total_cans_returned, pending_cans, customer_deposit_balance}` — one entry per can size.
