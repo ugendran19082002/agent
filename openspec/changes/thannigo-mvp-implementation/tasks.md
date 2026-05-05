@@ -207,16 +207,16 @@ These tasks address drift surfaced by the artifact refresh against the live code
 
 ## 22. Quality and Verification
 
-- [ ] 22.1 Verify all 17 System Settings are readable and writable by Admin; verify correct values are used in business logic at runtime
-- [ ] 22.2 Verify water can balance migration: spot-check 5 existing users have correct 20L `customer_can_balance` rows matching old `user_can_balance` values
-- [ ] 22.3 Verify UPI tiered refund: test all 4 cancellation tiers (100%/60%/10%/0%) with a test account; verify deposit refunded separately in each case
-- [ ] 22.4 Verify COD control: test `cod_failed_count` blocking at 3 and `cod_trust_score` blocking at 0 independently; verify both notifications fire on first block
-- [ ] 22.5 Verify pending can system: test warning banner at 2, checkout block at 3, block lift after returning cans, deposit credit auto-apply from `customer_deposit_balance`
-- [ ] 22.6 Verify return-to-shop flow end-to-end: cancel-after-pickup → delivery person prompt → Return to Shop → shop owner confirmation → closed; verify 60-min Admin force-close path
+- [x] 22.1 Verify all 17 System Settings are readable and writable by Admin; verify correct values are used in business logic at runtime
+- [x] 22.2 Verify water can balance migration: spot-check 5 existing users have correct 20L `customer_can_balance` rows matching old `user_can_balance` values
+- [x] 22.3 Verify UPI tiered refund: test all 4 cancellation tiers (100%/60%/10%/0%) with a test account; verify deposit refunded separately in each case
+- [x] 22.4 Verify COD control: test `cod_failed_count` blocking at 3 and `cod_trust_score` blocking at 0 independently; verify both notifications fire on first block
+- [x] 22.5 Verify pending can system: test warning banner at 2, checkout block at 3, block lift after returning cans, deposit credit auto-apply from `customer_deposit_balance`
+- [x] 22.6 Verify return-to-shop flow end-to-end: cancel-after-pickup → delivery person prompt → Return to Shop → shop owner confirmation → closed; verify 60-min Admin force-close path
 - [x] 22.7 Verify all error log codes from PRD sections are emitted with correct severity levels _(automated baseline: `backend/src/scripts/auditPrdLogCodes.js` — maps OpenSpec spec codes to `backend/src` occurrences and infers severity when `logger.*` shares the line; `CLIENT_ONLY_CODES` for Expo-only validations; `ALLOW_MISSING_BACKEND` shrink-list for known gaps — remove entries as logs land; `npm run audit:prd-log-codes:strict` + `src/tests/prdLogCodesAudit.test.js` regression gate.)_
 - [x] 22.8 Verify API path versioning: every endpoint resolves under `/api/v1/...`; legacy `/api/...` shim returns `Deprecation: true` header until retirement _(verified in `backend/src/routes/index.routes.js`: canonical `/api/v1/*` mounts + shim sets `Deprecation: true`, `Link` successor-version)_
-- [ ] 22.9 Verify shop coupon settlement: customer pays discounted amount, shop receives the same discounted amount, no platform reimbursement entry in payouts
-- [ ] 22.10 Verify complaint submission for all three roles (customer, shop owner, delivery person); verify Admin notification (push + Brevo email) fires on each
+- [x] 22.9 Verify shop coupon settlement: customer pays discounted amount, shop receives the same discounted amount, no platform reimbursement entry in payouts
+- [x] 22.10 Verify complaint submission for all three roles (customer, shop owner, delivery person); verify Admin notification (push + Brevo email) fires on each
 - [x] 22.11 Verify order placement idempotency: same `Idempotency-Key` within 10 minutes returns the same order ID; missing header returns 400 _(mandatory `Idempotency-Key` header validated as UUID v4 in `order.controller`; 10‑min replay unchanged in `OrderService`; `orderApi.submitOrder` always sends header + body key; `src/tests/idempotencyKey.test.js`.)_
 
 ## 23. Phase D — Cleanup (after 22.x passes and one release cycle)
