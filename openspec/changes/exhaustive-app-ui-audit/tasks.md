@@ -1,14 +1,14 @@
 ## 1. Audit inventory (no skipped files)
 
-- [ ] 1.1 Generate enumerated file list (`git ls-files`) for `frontend/app`, `frontend/components`, `frontend/styles`, `frontend/constants`, and layout-related `frontend/hooks`; define exempt non-UI patterns with rationale.
-- [ ] 1.2 Create the master audit register (markdown or sheet) with columns: path, area (auth/customer/shop/delivery/admin/shared), status, issues (spacing/type/responsive/safe-scroll/perf/dup), screen sections notes, last updated.
-- [ ] 1.3 Seed register with every enumerated path; none left “TBD” without exempt tag.
+- [x] 1.1 Generate enumerated file list (`git ls-files`) for `frontend/app`, `frontend/components`, `frontend/styles`, `frontend/constants`, and layout-related `frontend/hooks`; define exempt non-UI patterns with rationale.
+- [x] 1.2 Create the master audit register (markdown or sheet) with columns: path, area (auth/customer/shop/delivery/admin/shared), status, issues (spacing/type/responsive/safe-scroll/perf/dup), screen sections notes, last updated.
+- [x] 1.3 Seed register with every enumerated path; none left “TBD” without exempt tag.
 
 ## 2. Theme alignment
 
-- [ ] 2.1 Confirm `Spacing` scale in `constants/theme.ts` maps to 4/8/12/16/20/24/32; add named aliases only for gaps clearly missing project-wide.
-- [ ] 2.2 Document spacing-exception comment convention for rare non-scale literals (e.g. hairline).
-- [ ] 2.3 Reconcile with `mobile-ui-audit-design-system` / `production-ready-ui-audit` so token edits land once.
+- [x] 2.1 Confirm `Spacing` scale in `constants/theme.ts` maps to 4/8/12/16/20/24/32; add named aliases only for gaps clearly missing project-wide.
+- [x] 2.2 Document spacing-exception comment convention for rare non-scale literals (e.g. hairline).
+- [x] 2.3 Reconcile with `mobile-ui-audit-design-system` / `production-ready-ui-audit` so token edits land once.
 
 ## 3. Primitives and shared layout
 
@@ -45,7 +45,7 @@
 
 ## 9. Deliverables & verification
 
-- [ ] 9.1 Produce file-wise issue summary and screen-wise before/after notes for stakeholders.
-- [ ] 9.2 Run `npm run typecheck` and `npm run lint` in `frontend`; fix regressions.
+- [x] 9.1 Produce file-wise issue summary and screen-wise before/after notes for stakeholders.
+- [x] 9.2 Run `npm run typecheck` and `npm run lint` in `frontend`; fix regressions.
 - [ ] 9.3 Run targeted Detox or manual QA matrix (small phone, large phone, tablet) and record results in the register.
 - [ ] 9.4 Mark every register row **fixed** or **exempt**; open follow-up tickets for any intentional deferrals.

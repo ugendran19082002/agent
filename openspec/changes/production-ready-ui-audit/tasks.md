@@ -29,10 +29,10 @@
 
 ## 4. Auth Screen Refactor
 
-- [ ] 4.1 Refactor `app/auth/login.tsx` — replace inline hex/size values with theme tokens, verify `AppTextInput` and `Button size="lg"` are used
-- [ ] 4.2 Refactor `app/auth/otp.tsx` — standardize digit input sizing with `Spacing` tokens, verify resend timer uses `Colors.muted`
-- [ ] 4.3 Refactor `app/auth/role.tsx` — verify role selector cards use `roleSurface`, `roleAccent`, and `Card` component
-- [ ] 4.4 Refactor `app/auth/quick-login.tsx` and `app/auth/forgot-pin.tsx` — apply theme tokens throughout
+- [x] 4.1 Refactor `app/auth/login.tsx` — replace inline hex/size values with theme tokens, verify `AppTextInput` and `Button size="lg"` are used
+- [x] 4.2 Refactor `app/auth/otp.tsx` — standardize digit input sizing with `Spacing` tokens, verify resend timer uses `Colors.muted`
+- [x] 4.3 Refactor `app/auth/role.tsx` — verify role selector cards use `roleSurface`, `roleAccent`, and `Card` component
+- [x] 4.4 Refactor `app/auth/quick-login.tsx` and `app/auth/forgot-pin.tsx` — apply theme tokens throughout
 
 ## 5. Customer Screen Refactor
 
