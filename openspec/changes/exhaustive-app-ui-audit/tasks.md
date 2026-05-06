@@ -12,16 +12,16 @@
 
 ## 3. Primitives and shared layout
 
-- [ ] 3.1 Align `Button`, `AppTextInput`, `Card`, list row patterns, `PageHeader`, `EmptyState`, skeletons, banners to `rn-ui-primitives-contract`.
-- [ ] 3.2 Standardize `ScreenContainer` / shell patterns for safe-area + scroll contract.
+- [x] 3.1 Align `Button`, `AppTextInput`, `Card`, list row patterns, `PageHeader`, `EmptyState`, skeletons, banners to `rn-ui-primitives-contract`.
+- [x] 3.2 Standardize `ScreenContainer` / shell patterns for safe-area + scroll contract.
 
 ## 4. Spacing scale enforcement pass
 
-- [ ] 4.1 Replace non-token `padding`/`margin`/`gap` literals in `components/ui` and `components/*`.
-- [ ] 4.2 Replace literals in `app/auth/**` and register rows as fixed.
-- [ ] 4.3 Replace literals in customer routes `app/(tabs)/**`, `app/*` customer flows.
-- [ ] 4.4 Replace literals in `app/shop/**`.
-- [ ] 4.5 Replace literals in `app/delivery/**`.
+- [x] 4.1 Replace non-token `padding`/`margin`/`gap` literals in `components/ui` and `components/*`.
+- [x] 4.2 Replace literals in `app/auth/**` and register rows as fixed.
+- [x] 4.3 Replace literals in customer routes `app/(tabs)/**`, `app/*` customer flows.
+- [x] 4.4 Replace literals in `app/shop/**`.
+- [x] 4.5 Replace literals in `app/delivery/**`.
 - [ ] 4.6 Replace literals in `app/admin/**` and help/settings routes.
 
 ## 5. Responsive & overflow
