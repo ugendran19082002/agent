@@ -4,8 +4,8 @@
 - [x] 1.2 Update `styles/index.ts` to re-export `Colors`, `Typography`, `Spacing`, `Radius`, `Shadow` from `constants/theme.ts` (backward-compat shim)
 - [x] 1.3 Search all files in `app/` and `components/` for direct imports of `styles/colors.ts`, `styles/typography.ts`, `styles/spacing.ts` — migrate each to `constants/theme.ts` or `@/styles`
 - [x] 1.4 Delete `styles/colors.ts`, `styles/typography.ts`, `styles/spacing.ts` after all imports are migrated and no remaining references exist
-- [ ] 1.5 Grep `app/` and `components/` for bare hex strings (e.g. `'#[0-9a-fA-F]{3,6}'`) and replace each with the corresponding theme token
-- [ ] 1.6 Grep `app/` and `components/` for bare numeric padding/margin values (e.g. `padding: 16`) and replace with `Spacing.*` tokens
+- [x] 1.5 Grep `app/` and `components/` for bare hex strings (e.g. `'#[0-9a-fA-F]{3,6}'`) and replace each with the corresponding theme token
+- [x] 1.6 Grep `app/` and `components/` for bare numeric padding/margin values (e.g. `padding: 16`) and replace with `Spacing.*` tokens
 
 ## 2. Responsive Utilities
 
@@ -37,15 +37,15 @@
 ## 5. Customer Screen Refactor
 
 - [ ] 5.1 Refactor `app/(customer)/` tab screens — verify `Colors.customerSoft`, customer blue accent, `ScreenContainer`, and `PageHeader` usage
-- [ ] 5.2 Refactor `app/customer-payment-history.tsx`, `app/customer-payment-methods.tsx` — apply `Card`, `Typography`, `Spacing` tokens
-- [ ] 5.3 Refactor `app/customer-reviews.tsx`, `app/customer-analytics.tsx` — apply `StatCard`, `EmptyState`, and `Skeleton` where applicable
-- [ ] 5.4 Refactor `app/customer-raise-complaint.tsx` — verify `AppTextInput`, `Button`, `FormErrorMessage` usage with theme tokens
-- [ ] 5.5 Audit `components/customer/CustomerHomeShopCard.tsx` — apply `Card`, `Shadow.sm`, and `Spacing.md` tokens
+- [x] 5.2 Refactor `app/customer-payment-history.tsx`, `app/customer-payment-methods.tsx` — apply `Card`, `Typography`, `Spacing` tokens
+- [x] 5.3 Refactor `app/customer-reviews.tsx`, `app/customer-analytics.tsx` — apply `StatCard`, `EmptyState`, and `Skeleton` where applicable
+- [x] 5.4 Refactor `app/customer-raise-complaint.tsx` — verify `AppTextInput`, `Button`, `FormErrorMessage` usage with theme tokens
+- [x] 5.5 Audit `components/customer/CustomerHomeShopCard.tsx` — apply `Card`, `Shadow.sm`, and `Spacing.md` tokens
 
 ## 6. Shop Owner Screen Refactor
 
-- [ ] 6.1 Refactor `app/shop/` and `app/(shop)/` screens — replace hardcoded teal with `Colors.shopAccent`/`thannigoPalette.shopTeal` from theme
-- [ ] 6.2 Verify shop order list uses `Card`, semantic `Badge` for status, `EmptyState` for empty, `Skeleton` for loading
+- [x] 6.1 Refactor `app/shop/` and `app/(shop)/` screens — replace hardcoded teal with `Colors.shopAccent`/`thannigoPalette.shopTeal` from theme
+- [x] 6.2 Verify shop order list uses `Card`, semantic `Badge` for status, `EmptyState` for empty, `Skeleton` for loading
 - [ ] 6.3 Refactor shop settings, product management, and staff management screens for token compliance
 
 ## 7. Delivery Screen Refactor
