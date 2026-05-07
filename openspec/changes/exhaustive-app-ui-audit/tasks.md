@@ -22,21 +22,21 @@
 - [x] 4.3 Replace literals in customer routes `app/(tabs)/**`, `app/*` customer flows.
 - [x] 4.4 Replace literals in `app/shop/**`.
 - [x] 4.5 Replace literals in `app/delivery/**`.
-- [ ] 4.6 Replace literals in `app/admin/**` and help/settings routes.
+- [x] 4.6 Replace literals in `app/admin/**` and help/settings routes.
 
 ## 5. Responsive & overflow
 
-- [ ] 5.1 Audit fixed `width`/`height` usage; convert to flex/percent/shared max-width patterns per `rn-responsive-overflow-contract`.
-- [ ] 5.2 Verify tablet and small-phone simulators for overflow on representative routes per role; log fixes in register.
+- [x] 5.1 Audit fixed `width`/`height` usage; convert to flex/percent/shared max-width patterns per `rn-responsive-overflow-contract`.
+- [x] 5.2 Verify tablet and small-phone simulators for overflow on representative routes per role; log fixes in register.
 
 ## 6. Safe area & scroll
 
-- [ ] 6.1 Audit top/bottom safe areas on stacks modals and pinned footers; fix per `rn-safe-area-scroll-contract`.
-- [ ] 6.2 Ensure long forms and settings use scroll + keyboard avoidance where applicable.
+- [x] 6.1 Audit top/bottom safe areas on stacks modals and pinned footers; fix per `rn-safe-area-scroll-contract`.
+- [x] 6.2 Ensure long forms and settings use scroll + keyboard avoidance where applicable.
 
 ## 7. State surfaces
 
-- [ ] 7.1 Audit loading, empty, error, offline, maintenance UIs against tokens and primitives; update `ui-state-consistency` scope in register.
+- [x] 7.1 Audit loading, empty, error, offline, maintenance UIs against tokens and primitives; update `ui-state-consistency` scope in register.
 
 ## 8. Hygiene & performance
 

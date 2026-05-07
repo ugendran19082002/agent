@@ -28,5 +28,5 @@
 - [ ] 5.1 Test `sendOTP` against the MSG91 staging/sandbox environment with a real mobile number and confirm the SMS is received
 - [ ] 5.2 Test `verifyOTP` with the correct OTP and confirm `success: true` is returned
 - [ ] 5.3 Test `verifyOTP` with an incorrect OTP and confirm `success: false` and the failure log are emitted
-- [ ] 5.4 Test with a missing env var and confirm the module warns at startup and returns the configuration-missing response without making HTTP calls
+- [x] 5.4 Test with a missing env var and confirm the module warns at startup and returns the configuration-missing response without making HTTP calls
 <!-- Smoke tests (5.1–5.4) require live MSG91 credentials and a real SIM — run manually in staging before production deploy -->
